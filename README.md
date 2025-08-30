@@ -5,7 +5,9 @@ CueCast is a fast, simple desktop soundboard for streamers. Assign audio to butt
 ## Quick Start
 - Prerequisites: Node.js 20+, npm, macOS or Windows.
 - Install deps: `npm install`
-- Start in dev: `npm run dev`
+- Start in dev:
+  - Option A (static build): `npm run dev` (builds once, then runs Electron)
+  - Option B (Vite dev server + HMR): in one terminal run `npm run dev:renderer`, in another run `VITE_DEV_SERVER_URL=http://localhost:5173 npm run dev`
 - Build TS only: `npm run build-ts`
 - Package app: `npm run build`
 
@@ -43,4 +45,14 @@ CueCast is a fast, simple desktop soundboard for streamers. Assign audio to butt
   - Windows: `%APPDATA%\CueCast\logs\app.log`
 
 ## Roadmap (Post‑Epic 1)
-- Banks/profiles, per‑button color and gain UI, MIDI input, OBS integration, and cloud sync in future epics.
+ - Banks/profiles, per‑button color and gain UI, MIDI input, OBS integration, and cloud sync in future epics.
+
+## Renderer Stack
+- React 18 + React DOM, powered by Vite.
+- Entry: `src/renderer/index.html` → `src/renderer/main.tsx` → `src/renderer/App.tsx`.
+- IPC bridge exposed via `src/main/preload.ts` as `window.electronAPI` (typed in `src/common/types.ts`).
+
+## Electron Integration Notes
+- Main process serves the Vite dev server in dev when `VITE_DEV_SERVER_URL` is set; otherwise it loads the built renderer from `dist/renderer`.
+- Global hotkeys are registered in the main process and forwarded to the renderer via IPC.
+- Press Cmd/Ctrl+Shift+D in the renderer to cycle console log level (debug/info/warn/error).

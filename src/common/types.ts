@@ -12,14 +12,27 @@ export interface AppConfig {
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
+export interface HotkeyRegistrationResult {
+  accelerator: string;
+  ok: boolean;
+}
+
+export interface LogSettings {
+  level: LogLevel;
+}
+
 export interface ElectronAPI {
   getConfig: () => Promise<AppConfig>;
   updateConfig: (config: Partial<AppConfig>) => Promise<AppConfig>;
   selectAudioFile: () => Promise<string | null>;
   getAudioDevices: () => Promise<MediaDeviceInfo[]>;
+  readFileBytes: (path: string) => Promise<ArrayBuffer>;
   onTriggerButton: (callback: (buttonIndex: number) => void) => void;
   removeTriggerButtonListener: () => void;
   log: (level: LogLevel, message: string, meta?: any) => void;
+  onHotkeysRegistered: (callback: (results: HotkeyRegistrationResult[]) => void) => void;
+  getLogSettings: () => Promise<LogSettings>;
+  setLogSettings: (settings: LogSettings) => Promise<LogSettings>;
 }
 
 declare global {

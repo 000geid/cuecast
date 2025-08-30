@@ -1,7 +1,7 @@
 import { app, BrowserWindow, globalShortcut, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { AppConfig, ButtonConfig, LogLevel } from '../common/types';
+import { AppConfig, ButtonConfig, LogLevel, HotkeyRegistrationResult, LogSettings } from '../common/types';
 
 // ---- Constants & State ----
 const CONFIG_FILENAME = 'config.json';
@@ -19,7 +19,9 @@ let config: AppConfig = {
 };
 
 // ---- Logging ----
-// Writes to userData/logs/app.log and console
+// Writes to userData/logs/app.log and conditionally to console
+const LOG_LEVELS: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 };
+let consoleLogLevel: LogLevel = (process.env.CUECAST_LOG_LEVEL as LogLevel) || 'info';
 async function writeLog(level: LogLevel, message: string, meta?: any): Promise<void> {
   try {
     const logsDir = path.join(app.getPath('userData'), 'logs');
@@ -30,8 +32,10 @@ async function writeLog(level: LogLevel, message: string, meta?: any): Promise<v
   } catch (_e) {
     // ignore file logging errors
   }
-  const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
-  fn(`[${level}] ${message}`, meta ?? '');
+  if (LOG_LEVELS[level] >= LOG_LEVELS[consoleLogLevel]) {
+    const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+    fn(`[${level}] ${message}`, meta ?? '');
+  }
 }
 
 // ---- Helpers ----
@@ -55,8 +59,14 @@ function createWindow(): void {
     minHeight: 400
   });
 
-  // dist/main/index.js → dist/renderer/index.html
-  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  // Prefer Vite dev server only when explicitly provided via env.
+  const devServerUrl = process.env.VITE_DEV_SERVER_URL;
+  if (devServerUrl) {
+    mainWindow.loadURL(devServerUrl);
+  } else {
+    // dist/main/index.js → dist/renderer/index.html
+    mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  }
 
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
@@ -92,20 +102,34 @@ async function saveConfig(): Promise<void> {
   }
 }
 
-function registerHotkeys(): void {
+function registerHotkeys(): HotkeyRegistrationResult[] {
   globalShortcut.unregisterAll();
+  const results: HotkeyRegistrationResult[] = [];
   
   Object.entries(config.hotkeys).forEach(([accelerator, buttonIndex]) => {
     try {
-      globalShortcut.register(accelerator, () => {
+      const ok = globalShortcut.register(accelerator, () => {
         if (mainWindow) {
+          writeLog('info', 'Hotkey triggered', { accelerator, buttonIndex });
           mainWindow.webContents.send('trigger-button', buttonIndex);
         }
       });
+      results.push({ accelerator, ok: !!ok });
+      if (!ok) {
+        writeLog('warn', 'Hotkey registration returned false', { accelerator, buttonIndex });
+      } else {
+        writeLog('info', 'Hotkey registered', { accelerator, buttonIndex });
+      }
     } catch (error) {
+      results.push({ accelerator, ok: false });
       writeLog('warn', `Could not register hotkey ${accelerator}`, { error: String(error) });
     }
   });
+
+  if (mainWindow) {
+    mainWindow.webContents.send('hotkeys-registered', results);
+  }
+  return results;
 }
 
 app.whenReady().then(async () => {
@@ -164,6 +188,13 @@ ipcMain.handle('get-audio-devices', async (): Promise<MediaDeviceInfo[]> => {
   return [];
 });
 
+// Read local file bytes for audio decoding in renderer
+ipcMain.handle('read-file-bytes', async (_e, filePath: string): Promise<ArrayBuffer> => {
+  const buf = await fs.readFile(filePath);
+  // Ensure we return a tightly sliced ArrayBuffer (avoid pooled buffer)
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+});
+
 // Logging bridge from renderer
 ipcMain.on('log', async (_event, payload: { level: LogLevel; message: string; meta?: any }) => {
   const { level, message, meta } = payload || {};
@@ -171,4 +202,16 @@ ipcMain.on('log', async (_event, payload: { level: LogLevel; message: string; me
   const lvl: LogLevel = (allowed as any).includes(level) ? level : 'info';
   await writeLog(lvl, message ?? '');
   if (meta) await writeLog('debug', 'meta', meta);
+});
+
+ipcMain.handle('get-log-settings', async (): Promise<LogSettings> => {
+  return { level: consoleLogLevel };
+});
+
+ipcMain.handle('set-log-settings', async (_e, settings: LogSettings): Promise<LogSettings> => {
+  if (settings?.level && ['debug','info','warn','error'].includes(settings.level)) {
+    consoleLogLevel = settings.level as LogLevel;
+    await writeLog('info', 'Console log level changed', { level: consoleLogLevel });
+  }
+  return { level: consoleLogLevel };
 });
