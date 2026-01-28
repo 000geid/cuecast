@@ -27,6 +27,7 @@ export interface ElectronAPI {
   selectAudioFile: () => Promise<string | null>;
   getAudioDevices: () => Promise<MediaDeviceInfo[]>;
   readFileBytes: (path: string) => Promise<ArrayBuffer>;
+  setHotkeysEnabled: (enabled: boolean) => void;
   onTriggerButton: (callback: (buttonIndex: number) => void) => void;
   removeTriggerButtonListener: () => void;
   log: (level: LogLevel, message: string, meta?: any) => void;

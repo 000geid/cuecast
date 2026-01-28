@@ -12,6 +12,7 @@ function createDefaultButtons(count: number): ButtonConfig[] {
 }
 
 let mainWindow: BrowserWindow | null;
+let hotkeysSuppressed = false;
 let config: AppConfig = {
   buttons: createDefaultButtons(DEFAULT_BUTTONS_COUNT),
   hotkeys: {},
@@ -103,6 +104,11 @@ async function saveConfig(): Promise<void> {
 }
 
 function registerHotkeys(): HotkeyRegistrationResult[] {
+  if (hotkeysSuppressed) {
+    globalShortcut.unregisterAll();
+    if (mainWindow) mainWindow.webContents.send('hotkeys-registered', []);
+    return [];
+  }
   globalShortcut.unregisterAll();
   const results: HotkeyRegistrationResult[] = [];
   
@@ -135,7 +141,25 @@ function registerHotkeys(): HotkeyRegistrationResult[] {
 app.whenReady().then(async () => {
   await loadConfig();
   createWindow();
-  registerHotkeys();
+  // Only enable hotkeys when window is focused
+  if (mainWindow && mainWindow.isFocused()) {
+    registerHotkeys();
+  }
+
+  // Toggle hotkeys based on window focus
+  if (mainWindow) {
+    mainWindow.on('focus', () => {
+      const results = registerHotkeys();
+      writeLog('info', 'Hotkeys enabled (window focused)', { count: results.length });
+    });
+    mainWindow.on('blur', () => {
+      globalShortcut.unregisterAll();
+      writeLog('info', 'Hotkeys disabled (window blurred)');
+      if (mainWindow) {
+        mainWindow.webContents.send('hotkeys-registered', []);
+      }
+    });
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -161,7 +185,10 @@ ipcMain.handle('get-config', (): AppConfig => config);
 ipcMain.handle('update-config', async (event, newConfig: Partial<AppConfig>): Promise<AppConfig> => {
   config = { ...config, ...newConfig };
   await saveConfig();
-  registerHotkeys();
+  // Only (re)register if window is focused; otherwise leave disabled
+  if (BrowserWindow.getFocusedWindow() && !hotkeysSuppressed) {
+    registerHotkeys();
+  }
   await writeLog('info', 'Config updated via renderer');
   return config;
 });
@@ -191,8 +218,10 @@ ipcMain.handle('get-audio-devices', async (): Promise<MediaDeviceInfo[]> => {
 // Read local file bytes for audio decoding in renderer
 ipcMain.handle('read-file-bytes', async (_e, filePath: string): Promise<ArrayBuffer> => {
   const buf = await fs.readFile(filePath);
-  // Ensure we return a tightly sliced ArrayBuffer (avoid pooled buffer)
-  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  // Copy into a fresh ArrayBuffer to avoid SharedArrayBuffer type and ensure transferability
+  const copy = new Uint8Array(buf.byteLength);
+  copy.set(buf);
+  return copy.buffer;
 });
 
 // Logging bridge from renderer
@@ -206,6 +235,17 @@ ipcMain.on('log', async (_event, payload: { level: LogLevel; message: string; me
 
 ipcMain.handle('get-log-settings', async (): Promise<LogSettings> => {
   return { level: consoleLogLevel };
+});
+
+// Enable/disable hotkeys explicitly from renderer (e.g., while editing text)
+ipcMain.on('set-hotkeys-enabled', (_e, enabled: boolean) => {
+  hotkeysSuppressed = !enabled;
+  if (enabled && BrowserWindow.getFocusedWindow()) {
+    registerHotkeys();
+  } else {
+    globalShortcut.unregisterAll();
+    if (mainWindow) mainWindow.webContents.send('hotkeys-registered', []);
+  }
 });
 
 ipcMain.handle('set-log-settings', async (_e, settings: LogSettings): Promise<LogSettings> => {

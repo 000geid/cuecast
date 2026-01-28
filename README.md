@@ -1,6 +1,8 @@
-# CueCast – Electron Soundboard (Epic 1)
+# CueCast – Open Source Desktop Soundboard
 
-CueCast is a fast, simple desktop soundboard for streamers. Assign audio to buttons, trigger via clicks or global hotkeys, and route output to a virtual device for clean capture in OBS/Streamlabs.
+CueCast is a fast, simple desktop soundboard for streamers and podcasters in Lima, Peru. It serves an untapped market with a free, open source alternative to mobile-only tools and paywalled apps.
+
+Upload sounds, assign them to buttons, and trigger audio with your mouse or global hotkeys. Route output to a virtual device for clean capture in OBS/Streamlabs.
 
 ## Quick Start
 - Prerequisites: Node.js 20+, npm, macOS or Windows.
@@ -12,14 +14,13 @@ CueCast is a fast, simple desktop soundboard for streamers. Assign audio to butt
 - Package app: `npm run build`
 
 ## Using CueCast
-- Assign sounds: Click an empty button to choose a file, right‑click any button → Assign Audio File, or drag‑and‑drop `.wav/.mp3/.ogg/.flac` onto a button.
+- Upload sounds: Click an empty button to choose a file, right‑click any button → Assign Audio File, or drag‑and‑drop `.wav/.mp3/.ogg/.flac` onto a button.
 - Trigger sounds: Click buttons or set a hotkey (Right‑click → Set Hotkey). Hotkeys work globally.
 - Output device: Use the device dropdown in the header to select a virtual device (e.g., VB‑Audio Cable on Windows, BlackHole on macOS). Selection persists across restarts.
 
-## Audio Routing Details
-- Low‑latency playback: WebAudio with `latencyHint: "interactive"` and buffer caching.
-- Device routing: Audio graph uses `MediaStreamDestination` piped to a hidden `<audio>` element. When supported, the element’s `setSinkId(deviceId)` selects the output device.
-- Fallbacks: If `setSinkId` is unavailable or fails, CueCast falls back to the system default device and shows a status message.
+## How It Works
+- Audio engine: WebAudio with `latencyHint: "interactive"` and cached buffers for fast playback.
+- Output routing: `MediaStreamDestination` feeds a hidden `<audio>` element; `setSinkId(deviceId)` selects devices when supported, otherwise it falls back to the system default.
 
 ## Global Hotkeys
 - Registered in the Electron main process via `globalShortcut`.
@@ -44,8 +45,8 @@ CueCast is a fast, simple desktop soundboard for streamers. Assign audio to butt
   - macOS: `~/Library/Application Support/CueCast/logs/app.log`
   - Windows: `%APPDATA%\CueCast\logs\app.log`
 
-## Roadmap (Post‑Epic 1)
- - Banks/profiles, per‑button color and gain UI, MIDI input, OBS integration, and cloud sync in future epics.
+## Roadmap
+See `ROADMAP.md` for planned work and future epics.
 
 ## Renderer Stack
 - React 18 + React DOM, powered by Vite.

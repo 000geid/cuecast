@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAudioDevices: (): Promise<MediaDeviceInfo[]> => ipcRenderer.invoke('get-audio-devices'),
   
   readFileBytes: (path: string): Promise<ArrayBuffer> => ipcRenderer.invoke('read-file-bytes', path),
+
+  setHotkeysEnabled: (enabled: boolean): void => {
+    ipcRenderer.send('set-hotkeys-enabled', enabled);
+  },
   
   onTriggerButton: (callback: (buttonIndex: number) => void): void => {
     ipcRenderer.on('trigger-button', (event, buttonIndex: number) => callback(buttonIndex));

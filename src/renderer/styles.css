@@ -9,6 +9,7 @@ body {
   background: #1a1a1a;
   color: #ffffff;
   overflow: hidden;
+  font-size: 14px;
 }
 
 .app {
@@ -27,7 +28,7 @@ body {
 }
 
 .header h1 {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   color: #00ff88;
 }
@@ -42,9 +43,9 @@ body {
   background: #404040;
   color: #ffffff;
   border: 1px solid #555555;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .main {
@@ -55,9 +56,9 @@ body {
 
 .button-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
-  max-width: 800px;
+  max-width: 980px;
   margin: 0 auto;
 }
 
@@ -65,7 +66,7 @@ body {
   background: #333333;
   border: 2px solid #555555;
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.1s ease;
@@ -73,7 +74,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100px;
+  aspect-ratio: 1 / 1; /* make squares */
+  min-height: 150px;
   position: relative;
   user-select: none;
 }
@@ -89,6 +91,13 @@ body {
   transform: scale(0.98);
 }
 
+/* Hotkey/click feedback */
+.sound-button.playing {
+  background: #0a5;
+  border-color: #00ff88;
+  box-shadow: 0 0 0 2px rgba(0,255,136,0.3) inset;
+}
+
 .sound-button.empty {
   border-style: dashed;
   color: #888888;
@@ -102,7 +111,7 @@ body {
 
 .button-label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
   word-break: break-word;
 }
@@ -120,7 +129,7 @@ body {
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid #404040;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .status {
@@ -181,6 +190,7 @@ body {
 .modal-content h3 {
   margin-bottom: 16px;
   color: #00ff88;
+  font-size: 18px;
 }
 
 .hotkey-display {
@@ -192,6 +202,7 @@ body {
   text-align: center;
   font-family: monospace;
   color: #00ff88;
+  font-size: 14px;
 }
 
 .modal-buttons {
@@ -206,9 +217,9 @@ body {
   color: #ffffff;
   border: 1px solid #555555;
   border-radius: 4px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .modal-buttons button:hover {
@@ -225,6 +236,25 @@ body {
   color: #1a1a1a;
   border-color: #00ff88;
 }
+
+/* Edit modal fields */
+.form-field { margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 12px; color: #cccccc; }
+.form-field input {
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.file-row { display: flex; align-items: center; gap: 8px; }
+.file-row .file-path { flex: 1; font-size: 12px; color: #aaaaaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-row button { background: #404040; color: #ffffff; border: 1px solid #555555; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+.file-row button:hover { background: #555555; }
+
+.btn-stop { background: #ff4747; color: #fff; border: 1px solid #ff6b6b; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.btn-stop:hover { background: #ff5f5f; }
 
 @media (max-width: 600px) {
   .button-grid {
