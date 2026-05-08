@@ -8,14 +8,15 @@ Upload sounds, assign them to buttons, and trigger audio with your mouse or glob
 - Prerequisites: Node.js 20+, npm, macOS or Windows.
 - Install deps: `npm install`
 - Start in dev:
-  - Option A (static build): `npm run dev` (builds once, then runs Electron)
-  - Option B (Vite dev server + HMR): in one terminal run `npm run dev:renderer`, in another run `VITE_DEV_SERVER_URL=http://localhost:5173 npm run dev`
+  - `npm run dev` starts Vite, TypeScript watch mode, and Electron together.
+  - On Linux, the dev Electron process uses `--no-sandbox` to avoid local `chrome-sandbox` permission issues in `node_modules`.
 - Build TS only: `npm run build-ts`
 - Package app: `npm run build`
 
 ## Using CueCast
 - Upload sounds: Click an empty button to choose a file, right‑click any button → Assign Audio File, or drag‑and‑drop `.wav/.mp3/.ogg/.flac` onto a button.
 - Trigger sounds: Click buttons or set a hotkey (Right‑click → Set Hotkey). Hotkeys work globally.
+- Stop playback: Press `Space` from the main view or click `Stop All` to fade out every active sound.
 - Output device: Use the device dropdown in the header to select a virtual device (e.g., VB‑Audio Cable on Windows, BlackHole on macOS). Selection persists across restarts.
 
 ## How It Works

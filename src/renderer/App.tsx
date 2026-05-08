@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ElectronAPI } from '../common/types';
 import type { AppConfig } from '../common/types';
-import { useAudio, type ButtonConfig } from './hooks/useAudio';
+import { useAudio } from './hooks/useAudio';
 import { useAudioDevices } from './hooks/useAudioDevices';
-import { normalizeAccelerator } from './lib/accelerators';
 import { ContextMenu } from './components/ContextMenu';
 import { HotkeyModal } from './components/HotkeyModal';
 import { EditButtonModal } from './components/EditButtonModal';
@@ -15,29 +14,54 @@ const App: React.FC = () => {
   const [status, setStatus] = useState('Ready');
   const [ctxMenu, setCtxMenu] = useState<{x:number;y:number;index:number}|null>(null);
   const [hotkeyIndex, setHotkeyIndex] = useState<number | null>(null);
-  const [hotkeyText, setHotkeyText] = useState<string>('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const audioOutputs = useAudioDevices();
   const audio = useAudio();
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const configRef = useRef<AppConfig | null>(null);
+  const triggerIndexRef = useRef<(buttonIndex: number) => void>(() => {});
 
   useEffect(() => {
-    (async () => {
+    configRef.current = config;
+  }, [config]);
+
+  useEffect(() => {
+    let disposed = false;
+
+    const bootstrap = async () => {
       const cfg = await window.electronAPI.getConfig();
+      if (disposed) return;
       setConfig(cfg);
       await audio.init(cfg.outputDeviceId);
       // Best-effort preload of already assigned sounds
       cfg.buttons.forEach(b => { if (b.path) audio.preload(b.path); });
-      window.electronAPI.onTriggerButton((i:number) => {
+      const removeTriggerButtonListener = window.electronAPI.onTriggerButton((i:number) => {
         // Route through triggerIndex to keep UI feedback consistent
-        triggerIndex(i);
+        triggerIndexRef.current(i);
       });
-      window.electronAPI.onHotkeysRegistered?.((results) => {
+      const removeHotkeysRegisteredListener = window.electronAPI.onHotkeysRegistered((results) => {
         const ok = results.filter(r => r.ok).map(r => r.accelerator);
         const fail = results.filter(r => !r.ok).map(r => r.accelerator);
         setStatus(fail.length ? `Some hotkeys failed: ${fail.join(', ')}` : (ok.length ? `Hotkeys active: ${ok.join(', ')}` : 'No hotkeys set'));
       });
-    })();
+
+      return () => {
+        removeTriggerButtonListener();
+        removeHotkeysRegisteredListener();
+      };
+    };
+
+    let cleanup: (() => void) | undefined;
+    bootstrap().then((nextCleanup) => {
+      cleanup = nextCleanup;
+    }).catch(() => {
+      if (!disposed) setStatus('Failed to load app config');
+    });
+
+    return () => {
+      disposed = true;
+      cleanup?.();
+    };
   }, []);
 
   // Keyboard shortcut: Cmd/Ctrl+Shift+D toggles console log level
@@ -55,11 +79,26 @@ const App: React.FC = () => {
         } catch {
           // ignore
         }
+        return;
+      }
+
+      const target = e.target as HTMLElement | null;
+      const isEditable = target
+        ? target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]')
+        : null;
+      const hasOpenModal = hotkeyIndex !== null || editIndex !== null;
+      const isPlainSpace = !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && (e.key === ' ' || e.code === 'Space');
+
+      if (isPlainSpace && !isEditable && !hasOpenModal) {
+        e.preventDefault();
+        audio.stopAll();
+        setPlayingIndex(null);
+        setStatus('Stopped all audio');
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, []);
+  }, [audio, editIndex, hotkeyIndex]);
 
   // Suppress global hotkeys while modals or text inputs are active
   useEffect(() => {
@@ -72,70 +111,65 @@ const App: React.FC = () => {
     };
   }, [hotkeyIndex, editIndex]);
 
-  const updateConfig = useCallback(async (partial: Partial<AppConfig>) => {
-    const next = await window.electronAPI.updateConfig({ ...(config||{}), ...partial });
-    setConfig(next);
-  }, [config]);
-
   const assignAudio = useCallback(async (i: number) => {
     const filePath = await window.electronAPI.selectAudioFile();
     if (!filePath || !config) { setStatus('Assignment canceled'); return; }
-    const name = filePath.split('/').pop()?.split('.')[0] || 'Unknown';
-    const buttons = [...config.buttons];
-    buttons[i] = { ...buttons[i], label: name, path: filePath };
-    await updateConfig({ buttons });
+    const next = await window.electronAPI.assignButtonAudio({ buttonIndex: i, filePath });
+    setConfig(next);
     audio.preload(filePath);
-    setStatus(`Assigned: ${name}`);
-  }, [config, updateConfig]);
+    setStatus(`Assigned: ${next.buttons[i].label}`);
+  }, [audio, config]);
 
   const assignAudioPath = useCallback(async (i: number, filePath: string) => {
     if (!config) return;
-    const name = filePath.split('/').pop()?.split('.')[0] || 'Unknown';
-    const buttons = [...config.buttons];
-    buttons[i] = { ...buttons[i], label: name, path: filePath };
-    await updateConfig({ buttons });
+    const next = await window.electronAPI.assignButtonAudio({ buttonIndex: i, filePath });
+    setConfig(next);
     audio.preload(filePath);
-    setStatus(`Assigned: ${name}`);
-  }, [config, updateConfig]);
+    setStatus(`Assigned: ${next.buttons[i].label}`);
+  }, [audio, config]);
 
   const clearButton = useCallback(async (i:number) => {
     if (!config) return;
-    const buttons = [...config.buttons];
-    buttons[i] = { label: 'Empty', path: null, gain: 1.0 };
-    const hotkeys = { ...config.hotkeys };
-    Object.keys(hotkeys).forEach(k => { if (hotkeys[k] === i) delete hotkeys[k]; });
-    await updateConfig({ buttons, hotkeys });
+    const next = await window.electronAPI.clearButton({ buttonIndex: i });
+    setConfig(next);
     setStatus('Button cleared');
-  }, [config, updateConfig]);
+  }, [config]);
 
   const setHotkey = useCallback(async (i:number, acc: string) => {
     if (!config) return;
-    const normalized = normalizeAccelerator(acc);
-    const conflict = config.hotkeys[normalized];
-    if (conflict !== undefined && conflict !== i) { setStatus('Hotkey already in use'); return; }
-    const hotkeys = { ...config.hotkeys };
-    Object.keys(hotkeys).forEach(k => { if (hotkeys[k] === i) delete hotkeys[k]; });
-    hotkeys[normalized] = i;
-    await updateConfig({ hotkeys });
-    setStatus(`Hotkey set: ${normalized}`);
-  }, [config, updateConfig]);
+    const result = await window.electronAPI.setButtonHotkey({ buttonIndex: i, accelerator: acc });
+    if (!result.ok) {
+      setStatus('Hotkey already in use');
+      return;
+    }
+    setConfig(result.config);
+    setStatus(`Hotkey set: ${result.accelerator}`);
+  }, [config]);
 
   const triggerIndex = useCallback(async (i:number) => {
-    if (!config) return;
-    const btn = config.buttons[i];
+    const currentConfig = configRef.current;
+    if (!currentConfig) return;
+    const btn = currentConfig.buttons[i];
     if (!btn || !btn.path) { await assignAudio(i); return; }
     // Visual feedback for hotkeys and clicks
     setPlayingIndex(i);
     setTimeout(() => { setPlayingIndex(prev => (prev === i ? null : prev)); }, 220);
-    await audio.trigger(btn);
-  }, [config, audio, assignAudio]);
+    await audio.trigger(btn, i);
+  }, [audio, assignAudio]);
+
+  useEffect(() => {
+    triggerIndexRef.current = (i: number) => {
+      void triggerIndex(i);
+    };
+  }, [triggerIndex]);
 
   const onOutputChange = useCallback(async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     await audio.setOutput(val || null);
-    await updateConfig({ outputDeviceId: val || null });
+    const next = await window.electronAPI.setOutputDevice({ deviceId: val || null });
+    setConfig(next);
     setStatus(val ? 'Output device changed' : 'Using default output');
-  }, [audio, updateConfig]);
+  }, [audio]);
 
   const onContextMenu = useCallback((e: React.MouseEvent, index: number) => {
     e.preventDefault();
@@ -164,7 +198,18 @@ const App: React.FC = () => {
       <header className="header">
         <h1>CueCast</h1>
         <div className="controls">
-          <button className="btn-stop" onClick={() => audio.stopAll()} title="Stop All (fade out)">Stop All</button>
+          <button
+            className="btn-stop"
+            onClick={() => {
+              audio.stopAll();
+              setPlayingIndex(null);
+              setStatus('Stopped all audio');
+            }}
+            title="Stop All (Space)"
+            aria-keyshortcuts="Space"
+          >
+            Stop All
+          </button>
           <select id="output-device" className="device-select" onChange={onOutputChange} defaultValue={config.outputDeviceId || ''}>
             <option value="">Default Output</option>
             {audioOutputs.map(d => (
@@ -209,7 +254,7 @@ const App: React.FC = () => {
           y={ctxMenu.y}
           onAssign={() => { closeCtx(); assignAudio(ctxMenu.index); }}
           onClear={() => { closeCtx(); clearButton(ctxMenu.index); }}
-          onSetHotkey={() => { closeCtx(); setHotkeyIndex(ctxMenu.index); setHotkeyText(''); }}
+          onSetHotkey={() => { closeCtx(); setHotkeyIndex(ctxMenu.index); }}
           onEdit={() => { closeCtx(); setEditIndex(ctxMenu.index); }}
         />
       )}
@@ -227,9 +272,12 @@ const App: React.FC = () => {
           initialPath={config.buttons[editIndex].path}
           onCancel={() => setEditIndex(null)}
           onSave={async (title, newPath) => {
-            const buttons = [...config.buttons];
-            buttons[editIndex] = { ...buttons[editIndex], label: title, path: newPath };
-            await updateConfig({ buttons });
+            const next = await window.electronAPI.updateButtonDetails({
+              buttonIndex: editIndex,
+              label: title,
+              filePath: newPath
+            });
+            setConfig(next);
             if (newPath) audio.preload(newPath);
             setStatus('Button updated');
             setEditIndex(null);

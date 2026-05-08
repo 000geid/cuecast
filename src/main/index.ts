@@ -1,28 +1,18 @@
 import { app, BrowserWindow, globalShortcut, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { AppConfig, ButtonConfig, LogLevel, HotkeyRegistrationResult, LogSettings } from '../common/types';
+import { HotkeyRegistrationResult, LogLevel } from '../common/types';
+import { SoundboardService } from './soundboard-service';
 
 // ---- Constants & State ----
 const CONFIG_FILENAME = 'config.json';
-const DEFAULT_BUTTONS_COUNT = 8;
-
-function createDefaultButtons(count: number): ButtonConfig[] {
-  return Array.from({ length: count }, () => ({ label: 'Empty', path: null, gain: 1.0 }));
-}
 
 let mainWindow: BrowserWindow | null;
 let hotkeysSuppressed = false;
-let config: AppConfig = {
-  buttons: createDefaultButtons(DEFAULT_BUTTONS_COUNT),
-  hotkeys: {},
-  outputDeviceId: null
-};
 
 // ---- Logging ----
 // Writes to userData/logs/app.log and conditionally to console
 const LOG_LEVELS: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 };
-let consoleLogLevel: LogLevel = (process.env.CUECAST_LOG_LEVEL as LogLevel) || 'info';
 async function writeLog(level: LogLevel, message: string, meta?: any): Promise<void> {
   try {
     const logsDir = path.join(app.getPath('userData'), 'logs');
@@ -33,7 +23,7 @@ async function writeLog(level: LogLevel, message: string, meta?: any): Promise<v
   } catch (_e) {
     // ignore file logging errors
   }
-  if (LOG_LEVELS[level] >= LOG_LEVELS[consoleLogLevel]) {
+  if (LOG_LEVELS[level] >= LOG_LEVELS[service.getLogSettings().level]) {
     const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
     fn(`[${level}] ${message}`, meta ?? '');
   }
@@ -78,31 +68,6 @@ function createWindow(): void {
   });
 }
 
-async function loadConfig(): Promise<void> {
-  try {
-    const configPath = getConfigPath();
-    const data = await fs.readFile(configPath, 'utf8');
-    const loadedConfig: Partial<AppConfig> = JSON.parse(data);
-    
-    if (loadedConfig.buttons && Array.isArray(loadedConfig.buttons)) {
-      config = { ...config, ...loadedConfig };
-    }
-    await writeLog('info', 'Config loaded', { path: configPath });
-  } catch (error) {
-    await writeLog('warn', 'No config file found or error loading, using defaults');
-  }
-}
-
-async function saveConfig(): Promise<void> {
-  try {
-    const configPath = getConfigPath();
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2));
-    await writeLog('info', 'Config saved', { path: configPath });
-  } catch (error) {
-    await writeLog('error', 'Error saving config', { error: String(error) });
-  }
-}
-
 function registerHotkeys(): HotkeyRegistrationResult[] {
   if (hotkeysSuppressed) {
     globalShortcut.unregisterAll();
@@ -111,8 +76,8 @@ function registerHotkeys(): HotkeyRegistrationResult[] {
   }
   globalShortcut.unregisterAll();
   const results: HotkeyRegistrationResult[] = [];
-  
-  Object.entries(config.hotkeys).forEach(([accelerator, buttonIndex]) => {
+
+  Object.entries(service.getConfig().hotkeys).forEach(([accelerator, buttonIndex]) => {
     try {
       const ok = globalShortcut.register(accelerator, () => {
         if (mainWindow) {
@@ -138,8 +103,24 @@ function registerHotkeys(): HotkeyRegistrationResult[] {
   return results;
 }
 
+const service = new SoundboardService({
+  getConfigPath,
+  writeLog,
+  onAfterConfigChange: async () => {
+    if (BrowserWindow.getFocusedWindow() && !hotkeysSuppressed) {
+      return registerHotkeys();
+    }
+
+    globalShortcut.unregisterAll();
+    if (mainWindow) {
+      mainWindow.webContents.send('hotkeys-registered', []);
+    }
+    return [];
+  }
+});
+
 app.whenReady().then(async () => {
-  await loadConfig();
+  await service.loadConfig();
   createWindow();
   // Only enable hotkeys when window is focused
   if (mainWindow && mainWindow.isFocused()) {
@@ -180,18 +161,22 @@ app.on('will-quit', () => {
 });
 
 // ---- IPC ----
-ipcMain.handle('get-config', (): AppConfig => config);
+ipcMain.handle('get-config', () => service.getConfig());
 
-ipcMain.handle('update-config', async (event, newConfig: Partial<AppConfig>): Promise<AppConfig> => {
-  config = { ...config, ...newConfig };
-  await saveConfig();
-  // Only (re)register if window is focused; otherwise leave disabled
-  if (BrowserWindow.getFocusedWindow() && !hotkeysSuppressed) {
-    registerHotkeys();
-  }
-  await writeLog('info', 'Config updated via renderer');
-  return config;
-});
+ipcMain.handle('assign-button-audio', async (_event, input: { buttonIndex: number; filePath: string }) => service.assignButtonAudio(input));
+
+ipcMain.handle(
+  'update-button-details',
+  async (_event, input: { buttonIndex: number; label: string; filePath: string | null }) => service.updateButtonDetails(input)
+);
+
+ipcMain.handle('clear-button', async (_event, input: { buttonIndex: number }) => service.clearButton(input));
+
+ipcMain.handle('clear-button-hotkey', async (_event, input: { buttonIndex: number }) => service.clearButtonHotkey(input));
+
+ipcMain.handle('set-button-hotkey', async (_event, input: { buttonIndex: number; accelerator: string }) => service.setButtonHotkey(input));
+
+ipcMain.handle('set-output-device', async (_event, input: { deviceId: string | null }) => service.setOutputDevice(input));
 
 ipcMain.handle('select-audio-file', async (): Promise<string | null> => {
   const parent = mainWindow ?? BrowserWindow.getFocusedWindow() ?? null;
@@ -211,10 +196,6 @@ ipcMain.handle('select-audio-file', async (): Promise<string | null> => {
   return result.canceled ? null : result.filePaths[0];
 });
 
-ipcMain.handle('get-audio-devices', async (): Promise<MediaDeviceInfo[]> => {
-  return [];
-});
-
 // Read local file bytes for audio decoding in renderer
 ipcMain.handle('read-file-bytes', async (_e, filePath: string): Promise<ArrayBuffer> => {
   const buf = await fs.readFile(filePath);
@@ -225,17 +206,9 @@ ipcMain.handle('read-file-bytes', async (_e, filePath: string): Promise<ArrayBuf
 });
 
 // Logging bridge from renderer
-ipcMain.on('log', async (_event, payload: { level: LogLevel; message: string; meta?: any }) => {
-  const { level, message, meta } = payload || {};
-  const allowed: LogLevel[] = ['debug','info','warn','error'];
-  const lvl: LogLevel = (allowed as any).includes(level) ? level : 'info';
-  await writeLog(lvl, message ?? '');
-  if (meta) await writeLog('debug', 'meta', meta);
-});
+ipcMain.on('log', async (_event, payload: { level: LogLevel; message: string; meta?: any }) => service.logFromRenderer(payload));
 
-ipcMain.handle('get-log-settings', async (): Promise<LogSettings> => {
-  return { level: consoleLogLevel };
-});
+ipcMain.handle('get-log-settings', async () => service.getLogSettings());
 
 // Enable/disable hotkeys explicitly from renderer (e.g., while editing text)
 ipcMain.on('set-hotkeys-enabled', (_e, enabled: boolean) => {
@@ -248,10 +221,4 @@ ipcMain.on('set-hotkeys-enabled', (_e, enabled: boolean) => {
   }
 });
 
-ipcMain.handle('set-log-settings', async (_e, settings: LogSettings): Promise<LogSettings> => {
-  if (settings?.level && ['debug','info','warn','error'].includes(settings.level)) {
-    consoleLogLevel = settings.level as LogLevel;
-    await writeLog('info', 'Console log level changed', { level: consoleLogLevel });
-  }
-  return { level: consoleLogLevel };
-});
+ipcMain.handle('set-log-settings', async (_e, settings) => service.setLogSettings(settings));

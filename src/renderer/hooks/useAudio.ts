@@ -1,12 +1,12 @@
 import { useCallback, useRef } from 'react';
-import type { ElectronAPI } from '../../common/types';
+import type { ButtonConfig, ElectronAPI } from '../../common/types';
 
 declare global { interface Window { electronAPI: ElectronAPI; __cuecastAudio?: any } }
 
-export type ButtonConfig = {
-  label: string;
-  path: string | null;
-  gain: number;
+type ActivePlayback = {
+  src: AudioBufferSourceNode;
+  gain: GainNode;
+  buttonIndex: number | null;
 };
 
 export function useAudio() {
@@ -18,7 +18,8 @@ export function useAudio() {
       dest: null as MediaStreamAudioDestinationNode | null,
       el: null as HTMLAudioElement | null,
       cache: new Map<string, AudioBuffer>(),
-      active: new Set<{ src: AudioBufferSourceNode; gain: GainNode }>()
+      active: new Set<ActivePlayback>(),
+      activeByButton: new Map<number, ActivePlayback>()
     };
   }
   const audioContextRef = useRef<AudioContext | null>(window.__cuecastAudio.ctx);
@@ -26,7 +27,18 @@ export function useAudio() {
   const destRef = useRef<MediaStreamAudioDestinationNode | null>(window.__cuecastAudio.dest);
   const audioElRef = useRef<HTMLAudioElement | null>(window.__cuecastAudio.el);
   const cacheRef = useRef<Map<string, AudioBuffer>>(window.__cuecastAudio.cache);
-  const activeRef = useRef<Set<{ src: AudioBufferSourceNode; gain: GainNode }>>(window.__cuecastAudio.active);
+  const activeRef = useRef<Set<ActivePlayback>>(window.__cuecastAudio.active);
+  const activeByButtonRef = useRef<Map<number, ActivePlayback>>(window.__cuecastAudio.activeByButton);
+
+  const stopPlayback = useCallback((playback: ActivePlayback, stopTime: number) => {
+    try {
+      const current = playback.gain.gain.value || 0.0001;
+      playback.gain.gain.cancelScheduledValues(stopTime);
+      playback.gain.gain.setValueAtTime(current, stopTime);
+      playback.gain.gain.linearRampToValueAtTime(0.0001, stopTime + 0.01);
+      playback.src.stop(stopTime + 0.012);
+    } catch {}
+  }, []);
 
   const init = useCallback(async (outputDeviceId?: string | null) => {
     // Reuse existing context if present
@@ -74,37 +86,49 @@ export function useAudio() {
     }
   }, []);
 
-  const trigger = useCallback(async (button: ButtonConfig) => {
+  const trigger = useCallback(async (button: ButtonConfig, buttonIndex?: number) => {
     const ctx = audioContextRef.current;
     const mainGain = mainGainRef.current;
     if (!ctx || !mainGain || !button.path) return;
     if (ctx.state === 'suspended') await ctx.resume();
+    const now = ctx.currentTime;
     let buf = cacheRef.current.get(button.path);
     if (!buf) {
       const arr = await window.electronAPI.readFileBytes(button.path);
       buf = await ctx.decodeAudioData(arr);
       cacheRef.current.set(button.path, buf);
     }
+    activeRef.current.forEach((playback) => {
+      stopPlayback(playback, now);
+    });
+    activeByButtonRef.current.clear();
     const src = ctx.createBufferSource();
     const g = ctx.createGain();
     src.buffer = buf;
     src.playbackRate.value = 1.0;
     try { src.detune.value = 0; } catch {}
     // Fast fade-in to avoid clicks when starting playback
-    const target = button.gain || 1.0;
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.01);
+    const target = button.gain ?? 1.0;
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.linearRampToValueAtTime(target, now + 0.01);
     src.connect(g); g.connect(mainGain);
-    activeRef.current.add({ src, gain: g });
+    const playback: ActivePlayback = { src, gain: g, buttonIndex: buttonIndex ?? null };
+    activeRef.current.add(playback);
+    if (buttonIndex !== undefined) {
+      activeByButtonRef.current.set(buttonIndex, playback);
+    }
     src.addEventListener('ended', () => {
       // Cleanup finished sources
       try { src.disconnect(); } catch {}
       try { g.disconnect(); } catch {}
-      activeRef.current.forEach((pair) => { if (pair.src === src) activeRef.current.delete(pair); });
+      activeRef.current.delete(playback);
+      if (playback.buttonIndex !== null && activeByButtonRef.current.get(playback.buttonIndex) === playback) {
+        activeByButtonRef.current.delete(playback.buttonIndex);
+      }
     });
     // Small scheduling offset helps avoid initial crackles on some systems
-    src.start(audioContextRef.current!.currentTime + 0.005);
-  }, []);
+    src.start(now + 0.005);
+  }, [stopPlayback]);
 
   const preload = useCallback(async (path: string) => {
     const ctx = audioContextRef.current;
@@ -122,21 +146,15 @@ export function useAudio() {
     const ctx = audioContextRef.current;
     if (!ctx) return;
     const now = ctx.currentTime;
-    activeRef.current.forEach(({ src, gain }) => {
-      try {
-        // Fast fade-out to prevent clicks, then stop
-        const current = gain.gain.value || 0.0001;
-        gain.gain.cancelScheduledValues(now);
-        gain.gain.setValueAtTime(current, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
-        src.stop(now + 0.035);
-      } catch {}
+    activeRef.current.forEach((playback) => {
+      stopPlayback(playback, now);
     });
+    activeByButtonRef.current.clear();
     // Clear after a tick to allow ended events to fire
     setTimeout(() => {
       activeRef.current.clear();
     }, 50);
-  }, []);
+  }, [stopPlayback]);
 
   return { init, trigger, setOutput, preload, stopAll };
 }
