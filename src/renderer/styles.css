@@ -744,3 +744,23 @@ button {
     min-width: 0;
   }
 }
+
+@media (max-width: 520px) {
+  .rail-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  .transport-stop {
+    min-width: 80px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .secondary-action {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

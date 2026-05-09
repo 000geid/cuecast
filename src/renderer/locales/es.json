@@ -1,0 +1,115 @@
+{
+  "brand": {
+    "kicker": "Panel de Cues en Vivo",
+    "name": "CueCast"
+  },
+  "status": {
+    "ready": "Listo",
+    "consoleReady": "Consola lista",
+    "armed": "CueCast activo. Asigna o dispara un cue."
+  },
+  "controlRail": {
+    "output": "Salida",
+    "defaultOutput": "Salida Predeterminada",
+    "stopAll": "Detener Todo",
+    "stopAllTitle": "Detener Todo (Espacio)"
+  },
+  "deck": {
+    "kicker": "Superficie de Actuación",
+    "title": "Deck Principal",
+    "caption": "Haz clic en un cue para dispararlo en vivo. Inspecciona un cue para editar etiqueta, archivo, nivel o atajo."
+  },
+  "cueTile": {
+    "dropAudio": "Suelta audio o haz clic para asignar",
+    "noHotkey": "Sin Atajo",
+    "gain": "Ganancia",
+    "inspect": "Inspeccionar",
+    "inspectLabel": "Inspeccionar cue {{index}}",
+    "stateEmpty": "Vacío",
+    "stateReady": "Listo",
+    "stateError": "Error",
+    "stateArming": "Armando"
+  },
+  "inspector": {
+    "kicker": "Inspector",
+    "deckOverview": "Vista General del Deck",
+    "cueNumber": "Cue {{number}}",
+    "editDescription": "Edita los detalles del cue sin salir de la superficie de actuación.",
+    "overviewDescription": "Enrutamiento, estado y recursos recientes permanecen visibles cuando no hay nada seleccionado.",
+    "backToDeck": "Volver al Deck",
+    "cueDetails": "Detalles del Cue",
+    "pendingChanges": "Cambios pendientes",
+    "saved": "Guardado",
+    "label": "Etiqueta",
+    "labelPlaceholder": "Etiqueta del cue",
+    "audioFile": "Archivo de Audio",
+    "noFileAssigned": "Sin archivo asignado",
+    "chooseFileHint": "Elige un archivo o arrastra uno sobre una casilla de cue.",
+    "replaceFile": "Reemplazar Archivo",
+    "chooseFile": "Elegir Archivo",
+    "gain": "Ganancia",
+    "saveCue": "Guardar Cue",
+    "fireCue": "Disparar Cue",
+    "clearCue": "Limpiar Cue",
+    "hotkey": "Atajo",
+    "unassigned": "Sin asignar",
+    "changeHotkey": "Cambiar Atajo",
+    "setHotkey": "Asignar Atajo",
+    "clearHotkey": "Limpiar Atajo",
+    "routing": "Enrutamiento",
+    "liveOutput": "Salida en Vivo",
+    "defaultOutputDevice": "Dispositivo de salida predeterminado",
+    "selectedOutputDevice": "Dispositivo de salida seleccionado",
+    "stopHint": "Usa `Espacio` o el botón de transporte para detener toda la reproducción al instante.",
+    "statusFeed": "Feed de Estado",
+    "recentAudio": "Audio Reciente",
+    "session": "Sesión",
+    "emptyRecent": "Los archivos asignados aparecerán aquí para reutilización rápida.",
+    "nextUp": "Próximamente",
+    "reserved": "Reservado",
+    "nextUpDescription": "Este panel está diseñado para absorber futuros espacios de trabajo, perfiles y organización de recursos sin mover el deck."
+  },
+  "contextMenu": {
+    "assignAudio": "Asignar Archivo de Audio",
+    "editDetails": "Editar Detalles",
+    "clear": "Limpiar",
+    "setHotkey": "Asignar Atajo"
+  },
+  "hotkeyModal": {
+    "title": "Asignar Atajo",
+    "instructions": "Presiona la combinación de teclas que deseas usar:",
+    "placeholder": "Presiona teclas...",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "events": {
+    "assigned": "Asignado: {{label}}",
+    "assignmentCanceled": "Asignación cancelada",
+    "cueCleared": "Cue {{number}} limpiado",
+    "hotkeyCleared": "Atajo limpiado para cue {{number}}",
+    "hotkeyInUse": "Atajo ya en uso",
+    "hotkeySet": "Atajo configurado: {{accelerator}}",
+    "cueUpdated": "Cue {{number}} actualizado",
+    "fileSelectionCanceled": "Selección de archivo cancelada",
+    "loadedFile": "Archivo cargado: {{name}}",
+    "stoppedAll": "Todo el audio detenido",
+    "outputChanged": "Dispositivo de salida cambiado",
+    "usingDefault": "Usando salida predeterminada",
+    "invalidFileType": "Tipo de archivo inválido. Usa .wav, .mp3, .ogg o .flac",
+    "loadedRecent": "Archivo reciente cargado: {{name}}",
+    "failedConfig": "Error al cargar la configuración",
+    "hotkeysFailed": "Algunos atajos fallaron: {{list}}",
+    "hotkeysActive": "Atajos activos: {{list}}",
+    "noHotkeys": "Sin atajos configurados",
+    "logLevel": "Nivel de registro: {{level}}",
+    "audioDevice": "Dispositivo de Audio"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "languages": {
+      "en": "English",
+      "es": "Español"
+    }
+  }
+}

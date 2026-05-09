@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   onSave: (accelerator: string) => void;
@@ -6,6 +7,7 @@ type Props = {
 };
 
 export const HotkeyModal: React.FC<Props> = ({ onSave, onCancel }) => {
+  const { t } = useTranslation();
   const [hotkeyText, setHotkeyText] = useState('');
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -32,15 +34,14 @@ export const HotkeyModal: React.FC<Props> = ({ onSave, onCancel }) => {
       onKeyDown={onKeyDown}
     >
       <div className="modal-content">
-        <h3>Set Hotkey</h3>
-        <p>Press the key combination you want to use:</p>
-        <div id="hotkey-display" className="hotkey-display">{hotkeyText || 'Press keys...'}</div>
+        <h3>{t('hotkeyModal.title')}</h3>
+        <p>{t('hotkeyModal.instructions')}</p>
+        <div id="hotkey-display" className="hotkey-display">{hotkeyText || t('hotkeyModal.placeholder')}</div>
         <div className="modal-buttons">
-          <button id="hotkey-cancel" onClick={onCancel}>Cancel</button>
-          <button id="hotkey-save" disabled={!hotkeyText} onClick={() => onSave(hotkeyText)}>Save</button>
+          <button id="hotkey-cancel" onClick={onCancel}>{t('hotkeyModal.cancel')}</button>
+          <button id="hotkey-save" disabled={!hotkeyText} onClick={() => onSave(hotkeyText)}>{t('hotkeyModal.save')}</button>
         </div>
       </div>
     </div>
   );
 };
-

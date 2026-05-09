@@ -1,0 +1,115 @@
+{
+  "brand": {
+    "kicker": "Live Cue Deck",
+    "name": "CueCast"
+  },
+  "status": {
+    "ready": "Ready",
+    "consoleReady": "Console ready",
+    "armed": "CueCast armed. Assign or trigger a cue."
+  },
+  "controlRail": {
+    "output": "Output",
+    "defaultOutput": "Default Output",
+    "stopAll": "Stop All",
+    "stopAllTitle": "Stop All (Space)"
+  },
+  "deck": {
+    "kicker": "Performance Surface",
+    "title": "Main Deck",
+    "caption": "Click a cue to fire it live. Inspect a cue to edit label, file, level, or hotkey."
+  },
+  "cueTile": {
+    "dropAudio": "Drop audio or click to assign",
+    "noHotkey": "No Hotkey",
+    "gain": "Gain",
+    "inspect": "Inspect",
+    "inspectLabel": "Inspect cue {{index}}",
+    "stateEmpty": "Empty",
+    "stateReady": "Ready",
+    "stateError": "Error",
+    "stateArming": "Arming"
+  },
+  "inspector": {
+    "kicker": "Inspector",
+    "deckOverview": "Deck Overview",
+    "cueNumber": "Cue {{number}}",
+    "editDescription": "Edit cue details without leaving the performance surface.",
+    "overviewDescription": "Routing, status, and recent assets stay visible when nothing is selected.",
+    "backToDeck": "Back to Deck",
+    "cueDetails": "Cue Details",
+    "pendingChanges": "Pending changes",
+    "saved": "Saved",
+    "label": "Label",
+    "labelPlaceholder": "Cue label",
+    "audioFile": "Audio File",
+    "noFileAssigned": "No file assigned",
+    "chooseFileHint": "Choose a file or drag one onto a cue tile.",
+    "replaceFile": "Replace File",
+    "chooseFile": "Choose File",
+    "gain": "Gain",
+    "saveCue": "Save Cue",
+    "fireCue": "Fire Cue",
+    "clearCue": "Clear Cue",
+    "hotkey": "Hotkey",
+    "unassigned": "Unassigned",
+    "changeHotkey": "Change Hotkey",
+    "setHotkey": "Set Hotkey",
+    "clearHotkey": "Clear Hotkey",
+    "routing": "Routing",
+    "liveOutput": "Live Output",
+    "defaultOutputDevice": "Default output device",
+    "selectedOutputDevice": "Selected output device",
+    "stopHint": "Use `Space` or the transport button to stop all playback instantly.",
+    "statusFeed": "Status Feed",
+    "recentAudio": "Recent Audio",
+    "session": "Session",
+    "emptyRecent": "Assigned files will appear here for quick reuse.",
+    "nextUp": "Next Up",
+    "reserved": "Reserved",
+    "nextUpDescription": "This panel is intentionally shaped to absorb future workspaces, profiles, and asset organization without moving the deck."
+  },
+  "contextMenu": {
+    "assignAudio": "Assign Audio File",
+    "editDetails": "Edit Details",
+    "clear": "Clear",
+    "setHotkey": "Set Hotkey"
+  },
+  "hotkeyModal": {
+    "title": "Set Hotkey",
+    "instructions": "Press the key combination you want to use:",
+    "placeholder": "Press keys...",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "events": {
+    "assigned": "Assigned: {{label}}",
+    "assignmentCanceled": "Assignment canceled",
+    "cueCleared": "Cue {{number}} cleared",
+    "hotkeyCleared": "Hotkey cleared for cue {{number}}",
+    "hotkeyInUse": "Hotkey already in use",
+    "hotkeySet": "Hotkey set: {{accelerator}}",
+    "cueUpdated": "Cue {{number}} updated",
+    "fileSelectionCanceled": "File selection canceled",
+    "loadedFile": "Loaded file: {{name}}",
+    "stoppedAll": "Stopped all audio",
+    "outputChanged": "Output device changed",
+    "usingDefault": "Using default output",
+    "invalidFileType": "Invalid file type. Use .wav, .mp3, .ogg, or .flac",
+    "loadedRecent": "Loaded recent file: {{name}}",
+    "failedConfig": "Failed to load app config",
+    "hotkeysFailed": "Some hotkeys failed: {{list}}",
+    "hotkeysActive": "Hotkeys active: {{list}}",
+    "noHotkeys": "No hotkeys set",
+    "logLevel": "Console log level: {{level}}",
+    "audioDevice": "Audio Device"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languages": {
+      "en": "English",
+      "es": "Español"
+    }
+  }
+}

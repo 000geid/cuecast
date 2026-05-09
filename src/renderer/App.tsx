@@ -21,6 +21,7 @@ const App: React.FC = () => {
         status={controller.status}
         onStopAll={controller.stopAllAudio}
         onOutputChange={controller.onOutputChange}
+        onToggleSettings={controller.toggleSettings}
       />
 
       <main className="workspace-shell">
@@ -41,6 +42,7 @@ const App: React.FC = () => {
         />
 
         <InspectorPanel
+          showSettings={controller.showSettings}
           selectedIndex={controller.selectedIndex}
           selectedButton={controller.selectedButton}
           draft={controller.draft}

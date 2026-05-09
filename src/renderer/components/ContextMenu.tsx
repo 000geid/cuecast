@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   x: number;
@@ -10,16 +11,18 @@ type Props = {
 };
 
 export const ContextMenu: React.FC<Props> = ({ x, y, onAssign, onClear, onSetHotkey, onEdit }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       id="context-menu"
       className="context-menu"
       style={{ left: x, top: y, position: 'fixed' }}
     >
-      <div className="context-menu-item" onClick={onAssign}>Assign Audio File</div>
-      <div className="context-menu-item" onClick={onEdit}>Edit Details</div>
-      <div className="context-menu-item" onClick={onClear}>Clear</div>
-      <div className="context-menu-item" onClick={onSetHotkey}>Set Hotkey</div>
+      <div className="context-menu-item" onClick={onAssign}>{t('contextMenu.assignAudio')}</div>
+      <div className="context-menu-item" onClick={onEdit}>{t('contextMenu.editDetails')}</div>
+      <div className="context-menu-item" onClick={onClear}>{t('contextMenu.clear')}</div>
+      <div className="context-menu-item" onClick={onSetHotkey}>{t('contextMenu.setHotkey')}</div>
     </div>
   );
 };
