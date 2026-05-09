@@ -65,7 +65,7 @@ export function assignButtonAudio(config: AppConfig, input: { buttonIndex: numbe
 
 export function updateButtonDetails(
   config: AppConfig,
-  input: { buttonIndex: number; label: string; filePath: string | null }
+  input: { buttonIndex: number; label: string; filePath: string | null; gain: number }
 ): AppConfig {
   assertValidButtonIndex(config, input.buttonIndex);
 
@@ -73,7 +73,8 @@ export function updateButtonDetails(
   buttons[input.buttonIndex] = {
     ...buttons[input.buttonIndex],
     label: input.label,
-    path: input.filePath
+    path: input.filePath,
+    gain: Number.isFinite(input.gain) ? Math.max(0, Math.min(1.5, input.gain)) : buttons[input.buttonIndex].gain
   };
 
   return { ...config, buttons };

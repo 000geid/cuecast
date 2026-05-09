@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   assignButtonAudio: (input: { buttonIndex: number; filePath: string }): Promise<AppConfig> => ipcRenderer.invoke('assign-button-audio', input),
 
-  updateButtonDetails: (input: { buttonIndex: number; label: string; filePath: string | null }): Promise<AppConfig> =>
+  updateButtonDetails: (input: { buttonIndex: number; label: string; filePath: string | null; gain: number }): Promise<AppConfig> =>
     ipcRenderer.invoke('update-button-details', input),
 
   clearButton: (input: { buttonIndex: number }): Promise<AppConfig> => ipcRenderer.invoke('clear-button', input),

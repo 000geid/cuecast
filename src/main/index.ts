@@ -63,7 +63,24 @@ function createWindow(): void {
     mainWindow.webContents.openDevTools();
   }
 
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    writeLog('error', 'Renderer process gone', details);
+  });
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    writeLog('error', 'Renderer failed to load', { errorCode, errorDescription, validatedURL });
+  });
+
+  mainWindow.webContents.on('unresponsive', () => {
+    writeLog('warn', 'Renderer became unresponsive');
+  });
+
+  mainWindow.webContents.on('responsive', () => {
+    writeLog('info', 'Renderer became responsive again');
+  });
+
   mainWindow.on('closed', () => {
+    writeLog('warn', 'Main window closed');
     mainWindow = null;
   });
 }
@@ -81,7 +98,6 @@ function registerHotkeys(): HotkeyRegistrationResult[] {
     try {
       const ok = globalShortcut.register(accelerator, () => {
         if (mainWindow) {
-          writeLog('info', 'Hotkey triggered', { accelerator, buttonIndex });
           mainWindow.webContents.send('trigger-button', buttonIndex);
         }
       });
@@ -107,49 +123,41 @@ const service = new SoundboardService({
   getConfigPath,
   writeLog,
   onAfterConfigChange: async () => {
-    if (BrowserWindow.getFocusedWindow() && !hotkeysSuppressed) {
-      return registerHotkeys();
-    }
-
-    globalShortcut.unregisterAll();
-    if (mainWindow) {
-      mainWindow.webContents.send('hotkeys-registered', []);
-    }
-    return [];
+    return registerHotkeys();
   }
 });
 
 app.whenReady().then(async () => {
   await service.loadConfig();
   createWindow();
-  // Only enable hotkeys when window is focused
-  if (mainWindow && mainWindow.isFocused()) {
-    registerHotkeys();
-  }
-
-  // Toggle hotkeys based on window focus
-  if (mainWindow) {
-    mainWindow.on('focus', () => {
-      const results = registerHotkeys();
-      writeLog('info', 'Hotkeys enabled (window focused)', { count: results.length });
-    });
-    mainWindow.on('blur', () => {
-      globalShortcut.unregisterAll();
-      writeLog('info', 'Hotkeys disabled (window blurred)');
-      if (mainWindow) {
-        mainWindow.webContents.send('hotkeys-registered', []);
-      }
-    });
-  }
+  const results = registerHotkeys();
+  writeLog('info', 'Hotkeys ready', { count: results.length });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+      const nextResults = registerHotkeys();
+      writeLog('info', 'Hotkeys ready', { count: nextResults.length });
     }
   });
 });
 
+process.on('uncaughtException', (error) => {
+  writeLog('error', 'Uncaught exception in main process', {
+    name: error.name,
+    message: error.message,
+    stack: error.stack
+  });
+});
+
+process.on('unhandledRejection', (reason) => {
+  writeLog('error', 'Unhandled rejection in main process', {
+    reason: String(reason)
+  });
+});
+
 app.on('window-all-closed', () => {
+  writeLog('warn', 'All windows closed');
   globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') {
     app.quit();
@@ -157,6 +165,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
+  writeLog('warn', 'App will quit');
   globalShortcut.unregisterAll();
 });
 
@@ -167,7 +176,7 @@ ipcMain.handle('assign-button-audio', async (_event, input: { buttonIndex: numbe
 
 ipcMain.handle(
   'update-button-details',
-  async (_event, input: { buttonIndex: number; label: string; filePath: string | null }) => service.updateButtonDetails(input)
+  async (_event, input: { buttonIndex: number; label: string; filePath: string | null; gain: number }) => service.updateButtonDetails(input)
 );
 
 ipcMain.handle('clear-button', async (_event, input: { buttonIndex: number }) => service.clearButton(input));
@@ -212,13 +221,11 @@ ipcMain.handle('get-log-settings', async () => service.getLogSettings());
 
 // Enable/disable hotkeys explicitly from renderer (e.g., while editing text)
 ipcMain.on('set-hotkeys-enabled', (_e, enabled: boolean) => {
-  hotkeysSuppressed = !enabled;
-  if (enabled && BrowserWindow.getFocusedWindow()) {
-    registerHotkeys();
-  } else {
-    globalShortcut.unregisterAll();
-    if (mainWindow) mainWindow.webContents.send('hotkeys-registered', []);
+  if (hotkeysSuppressed === !enabled) {
+    return;
   }
+  hotkeysSuppressed = !enabled;
+  registerHotkeys();
 });
 
 ipcMain.handle('set-log-settings', async (_e, settings) => service.setLogSettings(settings));

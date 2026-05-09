@@ -47,7 +47,7 @@ export class SoundboardService {
     return this.applyConfig(assignButtonAudio(this.config, input), 'Config updated via assignButtonAudio');
   }
 
-  async updateButtonDetails(input: { buttonIndex: number; label: string; filePath: string | null }): Promise<AppConfig> {
+  async updateButtonDetails(input: { buttonIndex: number; label: string; filePath: string | null; gain: number }): Promise<AppConfig> {
     return this.applyConfig(updateButtonDetails(this.config, input), 'Config updated via updateButtonDetails');
   }
 

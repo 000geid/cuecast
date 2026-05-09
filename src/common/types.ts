@@ -37,7 +37,7 @@ export type SetButtonHotkeyResult =
 export interface ElectronAPI {
   getConfig: () => Promise<AppConfig>;
   assignButtonAudio: (input: { buttonIndex: number; filePath: string }) => Promise<AppConfig>;
-  updateButtonDetails: (input: { buttonIndex: number; label: string; filePath: string | null }) => Promise<AppConfig>;
+  updateButtonDetails: (input: { buttonIndex: number; label: string; filePath: string | null; gain: number }) => Promise<AppConfig>;
   clearButton: (input: { buttonIndex: number }) => Promise<AppConfig>;
   clearButtonHotkey: (input: { buttonIndex: number }) => Promise<AppConfig>;
   setButtonHotkey: (input: { buttonIndex: number; accelerator: string }) => Promise<SetButtonHotkeyResult>;

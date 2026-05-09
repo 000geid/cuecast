@@ -1,5 +1,5 @@
 import { setButtonHotkey } from './hotkeys';
-import { assignButtonAudio, clearButton, createDefaultConfig, setOutputDevice } from './soundboard';
+import { assignButtonAudio, clearButton, createDefaultConfig, setOutputDevice, updateButtonDetails } from './soundboard';
 
 describe('soundboard domain', () => {
   test('createDefaultConfig returns 8 empty buttons', () => {
@@ -31,6 +31,23 @@ describe('soundboard domain', () => {
 
     expect(next.buttons[1]).toEqual({ label: 'Empty', path: null, gain: 1.0 });
     expect(next.hotkeys).toEqual({ 'Control+2': 2 });
+  });
+
+  test('updateButtonDetails updates label, path, and gain', () => {
+    const config = createDefaultConfig();
+
+    const next = updateButtonDetails(config, {
+      buttonIndex: 4,
+      label: 'Intro sting',
+      filePath: '/tmp/intro.wav',
+      gain: 0.65
+    });
+
+    expect(next.buttons[4]).toEqual({
+      label: 'Intro sting',
+      path: '/tmp/intro.wav',
+      gain: 0.65
+    });
   });
 
   test('setButtonHotkey normalizes accelerators and replaces the same button binding', () => {

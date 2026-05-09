@@ -1,13 +1,14 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useState } from 'react';
 import type { ButtonConfig, ElectronAPI } from '../../common/types';
 
 declare global { interface Window { electronAPI: ElectronAPI; __cuecastAudio?: any } }
 
-type ActivePlayback = {
+type PlaybackVoice = {
   src: AudioBufferSourceNode;
   gain: GainNode;
-  buttonIndex: number | null;
 };
+
+export type CueLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 export function useAudio() {
   // Singleton across HMR/re-renders to avoid multiple contexts
@@ -15,49 +16,116 @@ export function useAudio() {
     window.__cuecastAudio = {
       ctx: null as AudioContext | null,
       mainGain: null as GainNode | null,
-      dest: null as MediaStreamAudioDestinationNode | null,
+      streamDest: null as MediaStreamAudioDestinationNode | null,
       el: null as HTMLAudioElement | null,
       cache: new Map<string, AudioBuffer>(),
-      active: new Set<ActivePlayback>(),
-      activeByButton: new Map<number, ActivePlayback>()
+      cachePromises: new Map<string, Promise<AudioBuffer>>(),
+      currentPlayback: null as PlaybackVoice | null,
+      unlockListenersBound: false,
+      outputMode: 'direct' as 'direct' | 'element'
     };
   }
-  const audioContextRef = useRef<AudioContext | null>(window.__cuecastAudio.ctx);
-  const mainGainRef = useRef<GainNode | null>(window.__cuecastAudio.mainGain);
-  const destRef = useRef<MediaStreamAudioDestinationNode | null>(window.__cuecastAudio.dest);
-  const audioElRef = useRef<HTMLAudioElement | null>(window.__cuecastAudio.el);
-  const cacheRef = useRef<Map<string, AudioBuffer>>(window.__cuecastAudio.cache);
-  const activeRef = useRef<Set<ActivePlayback>>(window.__cuecastAudio.active);
-  const activeByButtonRef = useRef<Map<number, ActivePlayback>>(window.__cuecastAudio.activeByButton);
+  const [loadStates, setLoadStates] = useState<Record<string, CueLoadState>>({});
 
-  const stopPlayback = useCallback((playback: ActivePlayback, stopTime: number) => {
+  const setLoadState = useCallback((path: string, next: CueLoadState) => {
+    setLoadStates((current) => (current[path] === next ? current : { ...current, [path]: next }));
+  }, []);
+
+  const stopPlayback = useCallback((playback: PlaybackVoice, stopTime: number, immediate = false) => {
     try {
-      const current = playback.gain.gain.value || 0.0001;
       playback.gain.gain.cancelScheduledValues(stopTime);
+      if (immediate) {
+        playback.gain.gain.setValueAtTime(0.0001, stopTime);
+        playback.src.stop(stopTime);
+        return;
+      }
+      const current = playback.gain.gain.value || 0.0001;
       playback.gain.gain.setValueAtTime(current, stopTime);
       playback.gain.gain.linearRampToValueAtTime(0.0001, stopTime + 0.01);
       playback.src.stop(stopTime + 0.012);
     } catch {}
   }, []);
 
+  const ensureStarted = useCallback(async (reason: string) => {
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
+    const el = window.__cuecastAudio.el as (HTMLAudioElement & { setSinkId?: (deviceId: string) => Promise<void> }) | null;
+    if (!ctx || !el) return false;
+
+    try {
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+    } catch (error) {
+      window.electronAPI.log('warn', 'AudioContext resume failed', { reason, error: String(error) });
+    }
+
+    try {
+      await el.play();
+    } catch (error) {
+      window.electronAPI.log('warn', 'Audio output element play failed', { reason, error: String(error) });
+    }
+
+    const started = ctx.state === 'running' && !el.paused;
+    if (!started) {
+      window.electronAPI.log('warn', 'Audio pipeline is not fully started', {
+        reason,
+        contextState: ctx.state,
+        elementPaused: el.paused
+      });
+    }
+    return started;
+  }, []);
+
+  const ensureContextRunning = useCallback(async (reason: string) => {
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
+    if (!ctx) return false;
+
+    try {
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+    } catch (error) {
+      window.electronAPI.log('warn', 'AudioContext resume failed', { reason, error: String(error) });
+    }
+
+    const started = ctx.state === 'running';
+    if (!started) {
+      window.electronAPI.log('warn', 'Audio context is not running', { reason, contextState: ctx.state });
+    }
+    return started;
+  }, []);
+
+  const bindUnlockListeners = useCallback(() => {
+    if (window.__cuecastAudio.unlockListenersBound) return;
+
+    const unlock = () => {
+      if (window.__cuecastAudio.outputMode === 'element') {
+        void ensureStarted('user-gesture');
+      } else {
+        void ensureContextRunning('user-gesture');
+      }
+    };
+
+    const options: AddEventListenerOptions = { capture: true };
+    document.addEventListener('pointerdown', unlock, options);
+    document.addEventListener('keydown', unlock, options);
+    document.addEventListener('touchstart', unlock, options);
+
+    window.__cuecastAudio.unlockListenersBound = true;
+  }, [ensureContextRunning, ensureStarted]);
+
   const init = useCallback(async (outputDeviceId?: string | null) => {
     // Reuse existing context if present
-    if (!audioContextRef.current) {
-      // Use 'playback' for crackle resistance; allow hardware sampleRate
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ latencyHint: 'playback' });
-      audioContextRef.current = ctx;
+    if (!window.__cuecastAudio.ctx) {
+      // Prefer lower latency for soundboard-style triggering.
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ latencyHint: 'interactive' });
       const mainGain = ctx.createGain();
-      const dest = ctx.createMediaStreamDestination();
-      mainGain.connect(dest);
-      mainGainRef.current = mainGain;
-      destRef.current = dest;
+      mainGain.connect(ctx.destination);
       const el = document.createElement('audio');
       el.style.display = 'none';
       el.autoplay = true;
       el.muted = false;
-      (el as any).srcObject = dest.stream;
       document.body.appendChild(el);
-      audioElRef.current = el;
       // Warm-up render pipeline with a short silent buffer
       try {
         const silence = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * 0.05)), ctx.sampleRate);
@@ -66,95 +134,146 @@ export function useAudio() {
         src.connect(mainGain);
         src.start();
       } catch {}
-      el.play().catch(() => {});
       // Persist singleton
       window.__cuecastAudio.ctx = ctx;
       window.__cuecastAudio.mainGain = mainGain;
-      window.__cuecastAudio.dest = dest;
       window.__cuecastAudio.el = el;
     }
-    const el = audioElRef.current as any;
-    if (outputDeviceId && el?.setSinkId) {
-      try { await el.setSinkId(outputDeviceId); } catch {}
-    }
-  }, []);
+    bindUnlockListeners();
+    await setOutput(outputDeviceId ?? null);
+  }, [bindUnlockListeners]);
 
   const setOutput = useCallback(async (deviceId: string | null) => {
-    const el = audioElRef.current as any;
-    if (el && el.setSinkId) {
-      try { await el.setSinkId(deviceId || ''); } catch {}
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
+    const mainGain = window.__cuecastAudio.mainGain as GainNode | null;
+    const el = window.__cuecastAudio.el as (HTMLAudioElement & { setSinkId?: (deviceId: string) => Promise<void> }) | null;
+    if (!ctx || !mainGain) return;
+
+    if (!deviceId) {
+      try { mainGain.disconnect(); } catch {}
+      mainGain.connect(ctx.destination);
+      window.__cuecastAudio.outputMode = 'direct';
+      if (el) {
+        try {
+          el.pause();
+          el.currentTime = 0;
+        } catch {}
+      }
+      await ensureContextRunning('set-output-direct');
+      return;
     }
-  }, []);
+
+    if (!window.__cuecastAudio.streamDest) {
+      window.__cuecastAudio.streamDest = ctx.createMediaStreamDestination();
+    }
+
+    if (el) {
+      (el as any).srcObject = window.__cuecastAudio.streamDest.stream;
+      if (el.setSinkId) {
+        try { await el.setSinkId(deviceId); } catch {}
+      }
+    }
+    try { mainGain.disconnect(); } catch {}
+    mainGain.connect(window.__cuecastAudio.streamDest);
+    window.__cuecastAudio.outputMode = 'element';
+    await ensureStarted('set-output-device');
+  }, [ensureContextRunning, ensureStarted]);
+
+  const getOrLoadBuffer = useCallback(async (path: string) => {
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
+    if (!ctx) {
+      throw new Error('Audio context is not initialized');
+    }
+
+    const cached = window.__cuecastAudio.cache.get(path) as AudioBuffer | undefined;
+    if (cached) {
+      setLoadState(path, 'ready');
+      return cached;
+    }
+
+    const existingLoad = window.__cuecastAudio.cachePromises.get(path) as Promise<AudioBuffer> | undefined;
+    if (existingLoad) {
+      return existingLoad;
+    }
+
+    setLoadState(path, 'loading');
+    const loadPromise = (async () => {
+      const arr = await window.electronAPI.readFileBytes(path);
+      const buf = await ctx.decodeAudioData(arr);
+      window.__cuecastAudio.cache.set(path, buf);
+      window.__cuecastAudio.cachePromises.delete(path);
+      setLoadState(path, 'ready');
+      return buf;
+    })().catch((error) => {
+      window.__cuecastAudio.cachePromises.delete(path);
+      setLoadState(path, 'error');
+      throw error;
+    });
+
+    window.__cuecastAudio.cachePromises.set(path, loadPromise);
+    return loadPromise;
+  }, [setLoadState]);
 
   const trigger = useCallback(async (button: ButtonConfig, buttonIndex?: number) => {
-    const ctx = audioContextRef.current;
-    const mainGain = mainGainRef.current;
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
+    const mainGain = window.__cuecastAudio.mainGain as GainNode | null;
     if (!ctx || !mainGain || !button.path) return;
-    if (ctx.state === 'suspended') await ctx.resume();
-    const now = ctx.currentTime;
-    let buf = cacheRef.current.get(button.path);
-    if (!buf) {
-      const arr = await window.electronAPI.readFileBytes(button.path);
-      buf = await ctx.decodeAudioData(arr);
-      cacheRef.current.set(button.path, buf);
+    if (window.__cuecastAudio.outputMode === 'element') {
+      const outputEl = window.__cuecastAudio.el as HTMLAudioElement | null;
+      if (ctx.state !== 'running' || (outputEl && outputEl.paused)) {
+        await ensureStarted(`trigger:${buttonIndex ?? 'unknown'}`);
+      }
+    } else if (ctx.state !== 'running') {
+      await ensureContextRunning(`trigger:${buttonIndex ?? 'unknown'}`);
     }
-    activeRef.current.forEach((playback) => {
-      stopPlayback(playback, now);
-    });
-    activeByButtonRef.current.clear();
+    const readyBuffer = window.__cuecastAudio.cache.get(button.path) as AudioBuffer | undefined;
+    const buf = readyBuffer ?? await getOrLoadBuffer(button.path);
+    const now = ctx.currentTime;
+    const currentPlayback = window.__cuecastAudio.currentPlayback as PlaybackVoice | null;
+    if (currentPlayback) {
+      stopPlayback(currentPlayback, now, true);
+      window.__cuecastAudio.currentPlayback = null;
+    }
     const src = ctx.createBufferSource();
     const g = ctx.createGain();
     src.buffer = buf;
     src.playbackRate.value = 1.0;
     try { src.detune.value = 0; } catch {}
-    // Fast fade-in to avoid clicks when starting playback
     const target = button.gain ?? 1.0;
     g.gain.setValueAtTime(0.0001, now);
-    g.gain.linearRampToValueAtTime(target, now + 0.01);
+    g.gain.linearRampToValueAtTime(target, now + 0.002);
     src.connect(g); g.connect(mainGain);
-    const playback: ActivePlayback = { src, gain: g, buttonIndex: buttonIndex ?? null };
-    activeRef.current.add(playback);
-    if (buttonIndex !== undefined) {
-      activeByButtonRef.current.set(buttonIndex, playback);
-    }
+    const playback: PlaybackVoice = { src, gain: g };
+    window.__cuecastAudio.currentPlayback = playback;
     src.addEventListener('ended', () => {
       // Cleanup finished sources
       try { src.disconnect(); } catch {}
       try { g.disconnect(); } catch {}
-      activeRef.current.delete(playback);
-      if (playback.buttonIndex !== null && activeByButtonRef.current.get(playback.buttonIndex) === playback) {
-        activeByButtonRef.current.delete(playback.buttonIndex);
+      if (window.__cuecastAudio.currentPlayback === playback) {
+        window.__cuecastAudio.currentPlayback = null;
       }
     });
-    // Small scheduling offset helps avoid initial crackles on some systems
-    src.start(now + 0.005);
-  }, [stopPlayback]);
+    src.start(now);
+  }, [ensureStarted, getOrLoadBuffer, stopPlayback]);
 
   const preload = useCallback(async (path: string) => {
-    const ctx = audioContextRef.current;
-    if (!ctx || !path || cacheRef.current.has(path)) return;
+    if (!path) return;
     try {
-      const arr = await window.electronAPI.readFileBytes(path);
-      const buf = await ctx.decodeAudioData(arr);
-      cacheRef.current.set(path, buf);
+      await getOrLoadBuffer(path);
     } catch {
       // ignore
     }
-  }, []);
+  }, [getOrLoadBuffer]);
 
   const stopAll = useCallback(() => {
-    const ctx = audioContextRef.current;
+    const ctx = window.__cuecastAudio.ctx as AudioContext | null;
     if (!ctx) return;
     const now = ctx.currentTime;
-    activeRef.current.forEach((playback) => {
-      stopPlayback(playback, now);
-    });
-    activeByButtonRef.current.clear();
-    // Clear after a tick to allow ended events to fire
-    setTimeout(() => {
-      activeRef.current.clear();
-    }, 50);
+    const currentPlayback = window.__cuecastAudio.currentPlayback as PlaybackVoice | null;
+    if (!currentPlayback) return;
+    stopPlayback(currentPlayback, now, true);
+    window.__cuecastAudio.currentPlayback = null;
   }, [stopPlayback]);
 
-  return { init, trigger, setOutput, preload, stopAll };
+  return { init, trigger, setOutput, preload, stopAll, loadStates };
 }
