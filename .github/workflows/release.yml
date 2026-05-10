@@ -9,6 +9,7 @@ on:
         default: windows
         type: choice
         options:
+          - linux
           - windows
           - macos
           - all
@@ -30,6 +31,37 @@ on:
       - 'v*'
 
 jobs:
+  build-linux:
+    if: github.event_name == 'push' || github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Linux artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CSC_IDENTITY_AUTO_DISCOVERY=false
+          npm run package:linux
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cuecast-linux
+          path: |
+            release/*.AppImage
+            release/*.AppImage.blockmap
+            release/latest-linux.yml
+          if-no-files-found: error
+
   build-macos:
     if: github.event_name == 'push' || github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'
     runs-on: macos-latest
@@ -65,7 +97,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cuecast-macos
-          path: release/*
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.dmg.blockmap
+            release/latest-mac.yml
           if-no-files-found: error
 
   build-windows:
@@ -100,7 +136,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cuecast-windows
-          path: release/*
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+            release/latest.yml
           if-no-files-found: error
 
   publish-release:
@@ -111,12 +150,15 @@ jobs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_release == 'true')
       ) &&
       (
+        needs.build-linux.result == 'success' ||
         needs.build-windows.result == 'success' ||
         needs.build-macos.result == 'success'
       ) &&
+      needs.build-linux.result != 'failure' &&
       needs.build-windows.result != 'failure' &&
       needs.build-macos.result != 'failure'
     needs:
+      - build-linux
       - build-macos
       - build-windows
     runs-on: ubuntu-latest

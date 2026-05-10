@@ -1,6 +1,6 @@
 {
   "name": "cuecast",
-  "version": "0.1.1",
+  "version": "0.1.11",
   "description": "Desktop Electron soundboard for streamers",
   "main": "dist/main/index.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "build": "npm run package",
     "package": "npm run build:app && electron-builder --publish never",
     "package:dir": "npm run build:app && electron-builder --dir --publish never",
+    "package:linux": "npm run build:app && electron-builder --linux AppImage --publish never",
     "package:mac": "npm run build:app && electron-builder --mac dmg zip --publish never",
     "package:win": "npm run build:app && electron-builder --win nsis portable --publish never",
     "start": "npm run build-ts && npm run build-renderer && electron .",
@@ -24,7 +25,7 @@
     "streaming",
     "audio"
   ],
-  "author": "CueCast Team",
+  "author": "Diego Alvarado",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.3.0",
@@ -43,6 +44,9 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "@fontsource/ibm-plex-sans-condensed": "^5.2.8",
     "i18next": "^26.0.10",
     "lucide-react": "^1.14.0",
     "react": "^18.2.0",
