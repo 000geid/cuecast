@@ -139,5 +139,3 @@ jobs:
           else
             gh release create "$tag" release-artifacts/* --title "$name" --notes "Automated release for $tag" --target "$TARGET_SHA"
           fi
-        with:
-          files: release-artifacts/**
