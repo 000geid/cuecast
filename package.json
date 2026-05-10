@@ -1,6 +1,6 @@
 {
   "name": "cuecast",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Desktop Electron soundboard for streamers",
   "main": "dist/main/index.js",
   "scripts": {

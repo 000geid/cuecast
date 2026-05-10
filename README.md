@@ -50,12 +50,12 @@ Upload sounds, assign them to buttons, and trigger audio with your mouse or glob
 ## Shipping macOS + Windows
 - GitHub Actions workflow: `.github/workflows/release.yml`
 - Triggers:
-  - Push a tag like `v1.0.0` to build macOS and Windows artifacts and attach them to a GitHub Release.
+  - Push a tag like `v0.1.0` to build macOS and Windows artifacts and attach them to a GitHub Release.
   - Run the workflow manually with `workflow_dispatch` to build `windows`, `macos`, or `all` and optionally publish a release.
 - Manual Windows-first flow with `gh`:
-  - `gh workflow run Release -f platform=windows -f publish_release=true -f release_tag=v1.0.0 -f release_name="CueCast v1.0.0"`
+  - `gh workflow run Release -f platform=windows -f publish_release=true -f release_tag=v0.1.0 -f release_name="CueCast v0.1.0"`
   - `gh run watch`
-  - `gh release view v1.0.0`
+  - `gh release view v0.1.0`
 - Required for smoother public distribution:
   - Windows code signing certificate to reduce SmartScreen warnings.
   - Apple Developer ID signing and notarization to avoid Gatekeeper blocks.
