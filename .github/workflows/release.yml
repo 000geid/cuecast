@@ -15,10 +15,10 @@ on:
       publish_release:
         description: Publish a GitHub Release after building
         required: true
-        default: true
+        default: false
         type: boolean
       release_tag:
-        description: Release tag to create when publishing manually, for example v1.0.0
+        description: Release tag to create when publishing manually, for example v0.1.0
         required: false
         type: string
       release_name:
