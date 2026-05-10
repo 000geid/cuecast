@@ -6,7 +6,12 @@
   "scripts": {
     "build-ts": "tsc",
     "build-renderer": "vite build",
-    "build": "npm run build-ts && npm run build-renderer && electron-builder",
+    "build:app": "npm run build-ts && npm run build-renderer",
+    "build": "npm run package",
+    "package": "npm run build:app && electron-builder --publish never",
+    "package:dir": "npm run build:app && electron-builder --dir --publish never",
+    "package:mac": "npm run build:app && electron-builder --mac dmg zip --publish never",
+    "package:win": "npm run build:app && electron-builder --win nsis portable --publish never",
     "start": "npm run build-ts && npm run build-renderer && electron .",
     "dev": "concurrently -k -n vite,ts,app -c blue,magenta,green \"vite\" \"tsc -w\" \"wait-on http://localhost:5173 dist/main/index.js dist/main/preload.js && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 nodemon --watch dist/main/index.js --watch dist/main/preload.js --ext js --ignore dist/main/**/*.map --delay 250ms --exec 'electron . --dev --no-sandbox'\"",
     "dev:renderer": "vite",
@@ -39,6 +44,7 @@
   },
   "dependencies": {
     "i18next": "^26.0.10",
+    "lucide-react": "^1.14.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^17.0.7"
@@ -46,18 +52,33 @@
   "build": {
     "appId": "com.cuecast.app",
     "productName": "CueCast",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "asar": true,
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "files": [
       "dist/**/*",
       "package.json"
     ],
     "mac": {
-      "category": "public.app-category.music"
+      "category": "public.app-category.music",
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
     }
   }
 }

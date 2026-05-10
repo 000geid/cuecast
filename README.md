@@ -11,7 +11,8 @@ Upload sounds, assign them to buttons, and trigger audio with your mouse or glob
   - `npm run dev` starts Vite, TypeScript watch mode, and Electron together.
   - On Linux, the dev Electron process uses `--no-sandbox` to avoid local `chrome-sandbox` permission issues in `node_modules`.
 - Build TS only: `npm run build-ts`
-- Package app: `npm run build`
+- Build app assets only: `npm run build:app`
+- Package app for the current OS: `npm run package`
 
 ## Using CueCast
 - Upload sounds: Click an empty button to choose a file, right‑click any button → Assign Audio File, or drag‑and‑drop `.wav/.mp3/.ogg/.flac` onto a button.
@@ -35,8 +36,33 @@ Upload sounds, assign them to buttons, and trigger audio with your mouse or glob
 - Corruption handling: If the JSON can’t be parsed at launch, CueCast resets to defaults without crashing.
 
 ## Packaging
-- `npm run build` compiles TypeScript and invokes electron‑builder.
-- Outputs installers under `dist/` per platform configuration.
+- Local packaging commands:
+  - `npm run package` builds the app and creates installers for the current OS.
+  - `npm run package:dir` builds an unpacked directory without creating installers.
+  - `npm run package:mac` builds `dmg` and `zip` artifacts on macOS.
+  - `npm run package:win` builds `nsis` and `portable` artifacts on Windows.
+- Compiled app files stay under `dist/`; distributable artifacts are written to `release/`.
+- Native targets should be built on native runners:
+  - macOS artifacts on macOS.
+  - Windows artifacts on Windows.
+  - Linux can package AppImage locally, but it cannot produce a signed macOS app.
+
+## Shipping macOS + Windows
+- GitHub Actions workflow: `.github/workflows/release.yml`
+- Triggers:
+  - Push a tag like `v1.0.0` to build macOS and Windows artifacts and attach them to a GitHub Release.
+  - Run the workflow manually with `workflow_dispatch` to build `windows`, `macos`, or `all` and optionally publish a release.
+- Manual Windows-first flow with `gh`:
+  - `gh workflow run Release -f platform=windows -f publish_release=true -f release_tag=v1.0.0 -f release_name="CueCast v1.0.0"`
+  - `gh run watch`
+  - `gh release view v1.0.0`
+- Required for smoother public distribution:
+  - Windows code signing certificate to reduce SmartScreen warnings.
+  - Apple Developer ID signing and notarization to avoid Gatekeeper blocks.
+- Recommended first-release checklist:
+  - Replace the default Electron app icon with `ico` and `icns` assets.
+  - Test install and first launch on a clean Windows machine and a clean macOS machine.
+  - Verify global hotkey permission prompts on macOS.
 
 ## Troubleshooting
 - No audio on selected device: Ensure a virtual output device is installed and selected; if `setSinkId` isn’t supported on your platform, default device is used.
