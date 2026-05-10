@@ -18,6 +18,7 @@ const App: React.FC = () => {
       <ControlRail
         audioOutputs={controller.audioOutputs}
         outputDeviceId={controller.config.outputDeviceId}
+        hotkeysArmed={controller.deckArmed}
         status={controller.status}
         onStopAll={controller.stopAllAudio}
         onOutputChange={controller.onOutputChange}
@@ -27,10 +28,13 @@ const App: React.FC = () => {
       <main className="workspace-shell">
         <CueDeck
           buttons={controller.config.buttons}
+          isArmed={controller.deckArmed}
           selectedIndex={controller.selectedIndex}
           playingIndex={controller.playingIndex}
           loadStateFor={controller.cueLoadState}
           assignedHotkey={controller.assignedHotkey}
+          onArm={controller.armDeckHotkeys}
+          onDisarm={controller.disarmDeckHotkeys}
           onTrigger={(index) => {
             void controller.triggerIndex(index);
           }}

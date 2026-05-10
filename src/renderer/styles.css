@@ -1,17 +1,15 @@
-:root {
-  --console-canvas: #161819;
-  --console-panel: #1d2123;
-  --console-panel-raised: #252b2e;
-  --console-panel-soft: #2b3236;
-  --console-border: rgba(219, 226, 228, 0.12);
-  --console-border-strong: rgba(219, 226, 228, 0.24);
-  --console-ink: #edf1f2;
-  --console-muted: #9da8ab;
-  --console-dim: #728086;
-  --signal-live: #78d07f;
-  --signal-amber: #d9a75e;
-  --signal-danger: #d56159;
-  --signal-cyan: #7dafc3;
+:root,
+:root[data-theme='cuecast'] {
+  color-scheme: dark;
+  --text-primary: #edf1f2;
+  --text-secondary: #9da8ab;
+  --text-tertiary: #728086;
+  --border-subtle: rgba(219, 226, 228, 0.12);
+  --border-strong: rgba(219, 226, 228, 0.24);
+  --accent-brand: #7dafc3;
+  --accent-highlight: #d9a75e;
+  --accent-success: #78d07f;
+  --accent-danger: #d56159;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.24);
   --radius-lg: 22px;
   --radius-md: 16px;
@@ -22,6 +20,197 @@
   --space-4: 24px;
   --space-5: 32px;
   --space-6: 40px;
+  --body-glow-left: rgba(217, 167, 94, 0.08);
+  --body-glow-right: rgba(125, 175, 195, 0.08);
+  --body-bg-start: #1a1d1e;
+  --body-bg-end: #121415;
+  --surface-rail-top: rgba(43, 50, 54, 0.95);
+  --surface-rail-bottom: rgba(29, 33, 35, 0.98);
+  --surface-status: rgba(22, 24, 25, 0.6);
+  --surface-shell-top: rgba(31, 36, 39, 0.96);
+  --surface-shell-bottom: rgba(22, 24, 25, 0.98);
+  --surface-tile-top: rgba(37, 43, 46, 0.9);
+  --surface-tile-bottom: rgba(27, 31, 33, 0.96);
+  --surface-card: rgba(37, 43, 46, 0.7);
+  --surface-hover: rgba(43, 50, 54, 0.9);
+  --surface-control: rgba(22, 24, 25, 0.92);
+  --surface-chip: rgba(22, 24, 25, 0.72);
+  --surface-button-secondary: rgba(22, 24, 25, 0.82);
+  --button-secondary-bg: #24292c;
+  --button-secondary-hover-bg: #30373b;
+  --button-primary-bg: #314854;
+  --button-primary-hover-bg: #3d5c6a;
+  --button-danger-bg: #4e2f33;
+  --button-danger-hover-bg: #63393e;
+  --surface-event: rgba(22, 24, 25, 0.6);
+  --surface-menu: rgba(29, 33, 35, 0.98);
+  --surface-modal: rgba(29, 33, 35, 0.98);
+  --surface-modal-overlay: rgba(8, 10, 11, 0.72);
+  --surface-hotkey: rgba(22, 24, 25, 0.82);
+  --state-live-bg: rgba(120, 208, 127, 0.14);
+  --state-live-border: rgba(120, 208, 127, 0.3);
+  --state-accent-bg: rgba(125, 175, 195, 0.14);
+  --state-accent-border: rgba(125, 175, 195, 0.24);
+  --state-stop-bg: rgba(213, 97, 89, 0.14);
+  --state-stop-hover: rgba(213, 97, 89, 0.22);
+  --state-stop-border: rgba(213, 97, 89, 0.32);
+  --state-stop-text: #ffb8b2;
+  --action-primary-bg: rgba(125, 175, 195, 0.16);
+  --action-primary-hover: rgba(125, 175, 195, 0.24);
+  --action-primary-border: rgba(125, 175, 195, 0.28);
+  --action-primary-text: #d6ebf3;
+  --state-selected-border: rgba(217, 167, 94, 0.46);
+  --state-selected-ring: rgba(217, 167, 94, 0.2);
+  --state-playing-border: rgba(120, 208, 127, 0.42);
+  --state-playing-ring: rgba(120, 208, 127, 0.16);
+  --state-playing-glow: rgba(120, 208, 127, 0.14);
+  --state-playing-overlay-top: rgba(61, 86, 63, 0.42);
+  --state-playing-overlay-bottom: rgba(27, 31, 33, 0.96);
+  --state-loading-border: rgba(217, 167, 94, 0.42);
+  --state-loading-ring: rgba(217, 167, 94, 0.16);
+  --state-error-border: rgba(213, 97, 89, 0.46);
+  --state-error-ring: rgba(213, 97, 89, 0.18);
+  --state-dirty-border: rgba(217, 167, 94, 0.32);
+  --focus-ring: rgba(125, 175, 195, 0.76);
+  --scrollbar-thumb: rgba(125, 175, 195, 0.38);
+  --scrollbar-thumb-hover: rgba(125, 175, 195, 0.52);
+  --scrollbar-track: rgba(22, 24, 25, 0.42);
+}
+
+:root[data-theme='frappe'] {
+  --text-primary: #c6d0f5;
+  --text-secondary: #b5bfe2;
+  --text-tertiary: #949cbb;
+  --border-subtle: rgba(148, 156, 187, 0.18);
+  --border-strong: rgba(181, 191, 226, 0.24);
+  --accent-brand: #ca9ee6;
+  --accent-highlight: #e5c890;
+  --accent-success: #a6d189;
+  --accent-danger: #e78284;
+  --shadow-soft: 0 18px 40px rgba(35, 38, 52, 0.46);
+  --body-glow-left: transparent;
+  --body-glow-right: transparent;
+  --body-bg-start: #303446;
+  --body-bg-end: #232634;
+  --surface-rail-top: rgba(81, 87, 109, 0.94);
+  --surface-rail-bottom: rgba(65, 69, 89, 0.98);
+  --surface-status: rgba(41, 44, 60, 0.84);
+  --surface-shell-top: rgba(65, 69, 89, 0.94);
+  --surface-shell-bottom: rgba(41, 44, 60, 0.98);
+  --surface-tile-top: rgba(81, 87, 109, 0.88);
+  --surface-tile-bottom: rgba(48, 52, 70, 0.96);
+  --surface-card: rgba(65, 69, 89, 0.72);
+  --surface-hover: rgba(98, 104, 128, 0.62);
+  --surface-control: rgba(41, 44, 60, 0.92);
+  --surface-chip: rgba(41, 44, 60, 0.82);
+  --surface-button-secondary: rgba(41, 44, 60, 0.88);
+  --button-secondary-bg: #414559;
+  --button-secondary-hover-bg: #51576d;
+  --button-primary-bg: #68557b;
+  --button-primary-hover-bg: #7a6590;
+  --button-danger-bg: #604149;
+  --button-danger-hover-bg: #754c56;
+  --surface-event: rgba(41, 44, 60, 0.78);
+  --surface-menu: rgba(48, 52, 70, 0.98);
+  --surface-modal: rgba(41, 44, 60, 0.98);
+  --surface-modal-overlay: rgba(35, 38, 52, 0.76);
+  --surface-hotkey: rgba(41, 44, 60, 0.9);
+  --state-live-bg: rgba(166, 209, 137, 0.16);
+  --state-live-border: rgba(166, 209, 137, 0.3);
+  --state-accent-bg: rgba(202, 158, 230, 0.16);
+  --state-accent-border: rgba(202, 158, 230, 0.28);
+  --state-stop-bg: rgba(231, 130, 132, 0.16);
+  --state-stop-hover: rgba(231, 130, 132, 0.24);
+  --state-stop-border: rgba(231, 130, 132, 0.32);
+  --state-stop-text: #f2cdcd;
+  --action-primary-bg: rgba(202, 158, 230, 0.18);
+  --action-primary-hover: rgba(202, 158, 230, 0.28);
+  --action-primary-border: rgba(202, 158, 230, 0.32);
+  --action-primary-text: #f1ddfb;
+  --state-selected-border: rgba(229, 200, 144, 0.42);
+  --state-selected-ring: rgba(229, 200, 144, 0.2);
+  --state-playing-border: rgba(166, 209, 137, 0.42);
+  --state-playing-ring: rgba(166, 209, 137, 0.18);
+  --state-playing-glow: rgba(166, 209, 137, 0.14);
+  --state-playing-overlay-top: rgba(70, 101, 79, 0.38);
+  --state-playing-overlay-bottom: rgba(48, 52, 70, 0.96);
+  --state-loading-border: rgba(229, 200, 144, 0.42);
+  --state-loading-ring: rgba(229, 200, 144, 0.16);
+  --state-error-border: rgba(231, 130, 132, 0.42);
+  --state-error-ring: rgba(231, 130, 132, 0.18);
+  --state-dirty-border: rgba(229, 200, 144, 0.3);
+  --focus-ring: rgba(186, 187, 241, 0.84);
+  --scrollbar-thumb: rgba(202, 158, 230, 0.34);
+  --scrollbar-thumb-hover: rgba(202, 158, 230, 0.5);
+  --scrollbar-track: rgba(41, 44, 60, 0.42);
+}
+
+:root[data-theme='atom-one'] {
+  --text-primary: #abb2bf;
+  --text-secondary: #9098a5;
+  --text-tertiary: #6f7782;
+  --border-subtle: rgba(171, 178, 191, 0.14);
+  --border-strong: rgba(171, 178, 191, 0.24);
+  --accent-brand: #61afef;
+  --accent-highlight: #e5c07b;
+  --accent-success: #98c379;
+  --accent-danger: #e06c75;
+  --shadow-soft: 0 18px 40px rgba(20, 22, 27, 0.44);
+  --body-glow-left: rgba(229, 192, 123, 0.08);
+  --body-glow-right: rgba(97, 175, 239, 0.08);
+  --body-bg-start: #282c34;
+  --body-bg-end: #1f2329;
+  --surface-rail-top: rgba(62, 68, 81, 0.94);
+  --surface-rail-bottom: rgba(40, 44, 52, 0.98);
+  --surface-status: rgba(33, 37, 43, 0.76);
+  --surface-shell-top: rgba(52, 58, 70, 0.94);
+  --surface-shell-bottom: rgba(40, 44, 52, 0.98);
+  --surface-tile-top: rgba(62, 68, 81, 0.88);
+  --surface-tile-bottom: rgba(31, 35, 41, 0.96);
+  --surface-card: rgba(62, 68, 81, 0.56);
+  --surface-hover: rgba(73, 80, 95, 0.78);
+  --surface-control: rgba(33, 37, 43, 0.92);
+  --surface-chip: rgba(33, 37, 43, 0.8);
+  --surface-button-secondary: rgba(33, 37, 43, 0.86);
+  --button-secondary-bg: #343942;
+  --button-secondary-hover-bg: #404650;
+  --button-primary-bg: #39506b;
+  --button-primary-hover-bg: #456280;
+  --button-danger-bg: #603a42;
+  --button-danger-hover-bg: #76464f;
+  --surface-event: rgba(33, 37, 43, 0.74);
+  --surface-menu: rgba(40, 44, 52, 0.98);
+  --surface-modal: rgba(40, 44, 52, 0.98);
+  --surface-modal-overlay: rgba(20, 22, 27, 0.76);
+  --surface-hotkey: rgba(33, 37, 43, 0.88);
+  --state-live-bg: rgba(152, 195, 121, 0.16);
+  --state-live-border: rgba(152, 195, 121, 0.3);
+  --state-accent-bg: rgba(97, 175, 239, 0.16);
+  --state-accent-border: rgba(97, 175, 239, 0.28);
+  --state-stop-bg: rgba(224, 108, 117, 0.16);
+  --state-stop-hover: rgba(224, 108, 117, 0.24);
+  --state-stop-border: rgba(224, 108, 117, 0.32);
+  --state-stop-text: #f3c6cb;
+  --action-primary-bg: rgba(97, 175, 239, 0.16);
+  --action-primary-hover: rgba(97, 175, 239, 0.24);
+  --action-primary-border: rgba(97, 175, 239, 0.3);
+  --action-primary-text: #d7ecff;
+  --state-selected-border: rgba(229, 192, 123, 0.42);
+  --state-selected-ring: rgba(229, 192, 123, 0.2);
+  --state-playing-border: rgba(152, 195, 121, 0.42);
+  --state-playing-ring: rgba(152, 195, 121, 0.18);
+  --state-playing-glow: rgba(152, 195, 121, 0.14);
+  --state-playing-overlay-top: rgba(73, 94, 60, 0.4);
+  --state-playing-overlay-bottom: rgba(31, 35, 41, 0.96);
+  --state-loading-border: rgba(229, 192, 123, 0.42);
+  --state-loading-ring: rgba(229, 192, 123, 0.16);
+  --state-error-border: rgba(224, 108, 117, 0.42);
+  --state-error-ring: rgba(224, 108, 117, 0.18);
+  --state-dirty-border: rgba(229, 192, 123, 0.3);
+  --focus-ring: rgba(97, 175, 239, 0.78);
+  --scrollbar-thumb: rgba(97, 175, 239, 0.36);
+  --scrollbar-thumb-hover: rgba(97, 175, 239, 0.52);
+  --scrollbar-track: rgba(33, 37, 43, 0.42);
 }
 
 * {
@@ -38,10 +227,10 @@ body,
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(217, 167, 94, 0.08), transparent 28%),
-    radial-gradient(circle at top right, rgba(125, 175, 195, 0.08), transparent 24%),
-    linear-gradient(180deg, #1a1d1e 0%, #121415 100%);
-  color: var(--console-ink);
+    radial-gradient(circle at top left, var(--body-glow-left), transparent 28%),
+    radial-gradient(circle at top right, var(--body-glow-right), transparent 24%),
+    linear-gradient(180deg, var(--body-bg-start) 0%, var(--body-bg-end) 100%);
+  color: var(--text-primary);
   font: 14px/1.4 "IBM Plex Sans", "Segoe UI", sans-serif;
   overflow: hidden;
 }
@@ -71,8 +260,8 @@ button {
   gap: var(--space-3);
   align-items: center;
   padding: var(--space-3);
-  background: linear-gradient(180deg, rgba(43, 50, 54, 0.95), rgba(29, 33, 35, 0.98));
-  border: 1px solid var(--console-border);
+  background: linear-gradient(180deg, var(--surface-rail-top), var(--surface-rail-bottom));
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
@@ -86,7 +275,7 @@ button {
 
 .brand-kicker,
 .section-kicker {
-  color: var(--signal-cyan);
+  color: var(--accent-brand);
   font-family: "IBM Plex Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.14em;
@@ -104,14 +293,14 @@ button {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--console-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: rgba(22, 24, 25, 0.6);
+  background: var(--surface-status);
 }
 
 .rail-status p {
   min-width: 0;
-  color: var(--console-muted);
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -133,15 +322,80 @@ button {
 }
 
 .status-pill-live {
-  background: rgba(120, 208, 127, 0.14);
-  color: var(--signal-live);
-  border: 1px solid rgba(120, 208, 127, 0.3);
+  background: var(--state-live-bg);
+  color: var(--accent-success);
+  border: 1px solid var(--state-live-border);
 }
 
 .rail-controls {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  width: 100%;
+}
+
+.hotkey-state-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-status);
+  min-width: 0;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.hotkey-state-indicator.is-armed {
+  border-color: var(--state-accent-border);
+  background: color-mix(in srgb, var(--surface-status) 72%, var(--accent-brand) 28%);
+}
+
+.hotkey-state-indicator.is-disarmed {
+  border-color: var(--border-strong);
+}
+
+.hotkey-state-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--surface-chip);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  flex: none;
+}
+
+.hotkey-state-indicator.is-armed .hotkey-state-icon {
+  color: var(--accent-brand);
+  border-color: var(--state-accent-border);
+  background: var(--state-accent-bg);
+}
+
+.hotkey-state-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hotkey-state-copy strong {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.hotkey-state-copy span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
 }
 
 .device-picker {
@@ -159,7 +413,7 @@ button {
 .cue-gain,
 .overview-line,
 .empty-copy {
-  color: var(--console-muted);
+  color: var(--text-secondary);
 }
 
 .device-picker span,
@@ -180,11 +434,122 @@ button {
 }
 
 .device-picker select,
-.inspector-field input {
-  background: rgba(22, 24, 25, 0.92);
-  color: var(--console-ink);
-  border: 1px solid var(--console-border);
+.inspector-field input,
+.inspector-field select {
+  background: var(--surface-control);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   padding: 12px 14px;
+}
+
+.inspector-field select {
+  appearance: none;
+  width: 100%;
+  padding-right: 42px;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.settings-field {
+  padding: var(--space-2);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.settings-select-wrap {
+  position: relative;
+}
+
+.settings-select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid var(--text-secondary);
+  border-bottom: 1.5px solid var(--text-secondary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.settings-select-wrap.is-open::after {
+  transform: translateY(-35%) rotate(-135deg);
+  border-color: var(--accent-highlight);
+}
+
+.settings-select {
+  background: var(--surface-control);
+}
+
+.settings-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.settings-select-trigger:hover,
+.settings-select-trigger.is-open {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface-menu);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  z-index: 20;
+}
+
+.settings-dropdown-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.settings-dropdown-option:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-subtle);
+}
+
+.settings-dropdown-option.is-selected {
+  background: var(--surface-status);
+  border-color: var(--state-selected-border);
+  color: var(--accent-highlight);
+}
+
+.settings-dropdown-option.is-selected::after {
+  content: '✓';
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
 }
 
 .transport-stop,
@@ -197,17 +562,62 @@ button {
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
+.control-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+  min-width: max-content;
+}
+
+.button-icon-wrap {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  flex: none;
+}
+
+.button-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.button-label {
+  white-space: nowrap;
+}
+
 .transport-stop {
-  min-width: 120px;
+  min-width: max-content;
   padding: 12px 18px;
-  background: rgba(213, 97, 89, 0.14);
-  color: #ffb8b2;
-  border: 1px solid rgba(213, 97, 89, 0.32);
+  background: var(--button-danger-bg);
+  color: var(--state-stop-text);
+  border: 1px solid var(--state-stop-border);
+  white-space: nowrap;
 }
 
 .transport-stop:hover,
 .danger-action:hover {
-  background: rgba(213, 97, 89, 0.22);
+  background: var(--button-danger-hover-bg);
+}
+
+.transport-stop .button-icon-wrap {
+  background: var(--state-stop-bg);
+  border-color: rgba(255, 184, 178, 0.12);
+}
+
+.secondary-action.control-action .button-icon-wrap {
+  background: var(--surface-chip);
+  border-color: var(--border-subtle);
+  color: var(--accent-highlight);
 }
 
 .workspace-shell {
@@ -222,8 +632,8 @@ button {
 .deck-shell,
 .inspector-panel {
   min-height: 0;
-  background: linear-gradient(180deg, rgba(31, 36, 39, 0.96), rgba(22, 24, 25, 0.98));
-  border: 1px solid var(--console-border);
+  background: linear-gradient(180deg, var(--surface-shell-top), var(--surface-shell-bottom));
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
@@ -236,6 +646,16 @@ button {
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.deck-shell.is-armed {
+  border-color: var(--state-accent-border);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 0 0 1px var(--state-accent-border),
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 0 34px color-mix(in srgb, var(--accent-brand) 22%, transparent);
 }
 
 .deck-heading,
@@ -250,6 +670,13 @@ button {
   align-items: end;
 }
 
+.deck-heading-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .deck-heading h2,
 .inspector-header h2 {
   font-size: 28px;
@@ -259,7 +686,27 @@ button {
 .deck-caption,
 .inspector-header p {
   max-width: 34ch;
-  color: var(--console-muted);
+  color: var(--text-secondary);
+}
+
+.deck-status {
+  align-self: flex-end;
+}
+
+.deck-arm-button {
+  align-self: flex-end;
+}
+
+.deck-arm-button.is-active {
+  color: var(--accent-brand);
+  border-color: var(--state-accent-border);
+  background: var(--state-accent-bg);
+}
+
+.deck-arm-button.is-active .button-icon-wrap {
+  background: var(--state-accent-bg);
+  border-color: var(--state-accent-border);
+  color: var(--accent-brand);
 }
 
 .cue-grid {
@@ -275,11 +722,12 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 172px;
   padding: var(--space-2);
-  border: 1px solid var(--console-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(37, 43, 46, 0.9), rgba(27, 31, 33, 0.96));
+  background: var(--surface-tile-bottom);
 }
 
 .cue-tile.is-empty {
@@ -287,26 +735,24 @@ button {
 }
 
 .cue-tile.is-selected {
-  border-color: rgba(217, 167, 94, 0.46);
-  box-shadow: inset 0 0 0 1px rgba(217, 167, 94, 0.2);
+  border-color: var(--state-selected-border);
+  box-shadow: inset 0 0 0 1px var(--state-selected-ring);
 }
 
 .cue-tile.is-playing {
-  border-color: rgba(120, 208, 127, 0.42);
-  background:
-    linear-gradient(180deg, rgba(61, 86, 63, 0.42), rgba(27, 31, 33, 0.96)),
-    linear-gradient(180deg, rgba(37, 43, 46, 0.9), rgba(27, 31, 33, 0.96));
-  box-shadow: inset 0 0 0 1px rgba(120, 208, 127, 0.16), 0 0 0 1px rgba(120, 208, 127, 0.14);
+  border-color: var(--state-playing-border);
+  background: color-mix(in srgb, var(--surface-tile-bottom) 78%, var(--accent-success) 22%);
+  box-shadow: inset 0 0 0 1px var(--state-playing-ring), 0 0 0 1px var(--state-playing-glow);
 }
 
 .cue-tile.is-loading {
-  border-color: rgba(217, 167, 94, 0.42);
-  box-shadow: inset 0 0 0 1px rgba(217, 167, 94, 0.16);
+  border-color: var(--state-loading-border);
+  box-shadow: inset 0 0 0 1px var(--state-loading-ring);
 }
 
 .cue-tile.has-error {
-  border-color: rgba(213, 97, 89, 0.46);
-  box-shadow: inset 0 0 0 1px rgba(213, 97, 89, 0.18);
+  border-color: var(--state-error-border);
+  box-shadow: inset 0 0 0 1px var(--state-error-ring);
 }
 
 .cue-trigger {
@@ -315,6 +761,7 @@ button {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-3);
+  min-width: 0;
   width: 100%;
   text-align: left;
   padding: var(--space-2);
@@ -335,7 +782,7 @@ button {
 .danger-action:focus-visible,
 .transport-stop:focus-visible,
 .recent-audio-chip:focus-visible {
-  outline: 2px solid rgba(217, 167, 94, 0.78);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -355,30 +802,46 @@ button {
 }
 
 .cue-index {
-  color: var(--console-dim);
+  color: var(--text-tertiary);
 }
 
 .cue-hotkey {
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(22, 24, 25, 0.72);
-  color: var(--signal-cyan);
-  border: 1px solid var(--console-border);
+  background: var(--surface-chip);
+  color: var(--accent-brand);
+  border: 1px solid var(--border-subtle);
 }
 
 .cue-copy {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .cue-copy strong {
+  display: block;
+  width: 100%;
+  min-width: 0;
   font-size: 24px;
   font-family: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
   font-weight: 600;
+  line-height: 1.05;
+  min-height: 2.1em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .cue-copy span {
+  width: 100%;
   font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -388,16 +851,16 @@ button {
 .cue-inspect {
   align-self: flex-end;
   padding: 8px 12px;
-  background: rgba(22, 24, 25, 0.88);
-  color: var(--signal-amber);
-  border: 1px solid var(--console-border);
+  background: var(--button-secondary-bg);
+  color: var(--accent-highlight);
+  border: 1px solid var(--border-subtle);
 }
 
 .cue-inspect:hover,
 .secondary-action:hover,
 .recent-audio-chip:hover {
-  background: rgba(43, 50, 54, 0.9);
-  border-color: var(--console-border-strong);
+  background: var(--button-secondary-hover-bg);
+  border-color: var(--border-strong);
 }
 
 .inspector-panel {
@@ -423,8 +886,8 @@ button {
   flex-direction: column;
   gap: var(--space-2);
   padding: 14px;
-  background: rgba(37, 43, 46, 0.7);
-  border: 1px solid var(--console-border);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
 }
 
@@ -437,20 +900,20 @@ button {
 }
 
 .save-state {
-  background: rgba(22, 24, 25, 0.72);
-  color: var(--console-muted);
-  border: 1px solid var(--console-border);
+  background: var(--surface-chip);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
 .save-state.is-dirty {
-  color: var(--signal-amber);
-  border-color: rgba(217, 167, 94, 0.32);
+  color: var(--accent-highlight);
+  border-color: var(--state-dirty-border);
 }
 
 .signal-chip {
-  background: rgba(125, 175, 195, 0.14);
-  color: var(--signal-cyan);
-  border: 1px solid rgba(125, 175, 195, 0.24);
+  background: var(--state-accent-bg);
+  color: var(--accent-brand);
+  border: 1px solid var(--state-accent-border);
 }
 
 .inspector-field {
@@ -464,13 +927,13 @@ button {
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
-  background: rgba(22, 24, 25, 0.72);
-  border: 1px solid var(--console-border);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
 }
 
 .file-summary strong {
-  color: var(--console-ink);
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -485,35 +948,35 @@ button {
 
 .gain-field strong {
   font-family: "IBM Plex Mono", monospace;
-  color: var(--signal-amber);
+  color: var(--accent-highlight);
 }
 
 .primary-action,
 .secondary-action,
 .danger-action {
   padding: 11px 14px;
-  border: 1px solid var(--console-border);
+  border: 1px solid var(--border-subtle);
 }
 
 .primary-action {
-  background: rgba(120, 208, 127, 0.14);
-  color: #c6f1c9;
-  border-color: rgba(120, 208, 127, 0.26);
+  background: var(--button-primary-bg);
+  color: var(--action-primary-text);
+  border-color: var(--action-primary-border);
 }
 
 .primary-action:hover {
-  background: rgba(120, 208, 127, 0.22);
+  background: var(--button-primary-hover-bg);
 }
 
 .secondary-action {
-  background: rgba(22, 24, 25, 0.82);
-  color: var(--console-ink);
+  background: var(--button-secondary-bg);
+  color: var(--text-primary);
 }
 
 .danger-action {
-  background: rgba(213, 97, 89, 0.14);
-  color: #ffb8b2;
-  border-color: rgba(213, 97, 89, 0.32);
+  background: var(--button-danger-bg);
+  color: var(--state-stop-text);
+  border-color: var(--state-stop-border);
 }
 
 .inspector-actions {
@@ -533,10 +996,10 @@ button {
 
 .event-feed p {
   padding: 10px 12px;
-  background: rgba(22, 24, 25, 0.6);
-  border: 1px solid var(--console-border);
+  background: var(--surface-event);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
-  color: var(--console-muted);
+  color: var(--text-secondary);
 }
 
 .recent-audio-list {
@@ -549,7 +1012,7 @@ button {
 .inspector-panel,
 .event-feed {
   scrollbar-width: thin;
-  scrollbar-color: rgba(217, 167, 94, 0.45) rgba(22, 24, 25, 0.42);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .deck-shell::-webkit-scrollbar,
@@ -562,22 +1025,22 @@ button {
 .deck-shell::-webkit-scrollbar-track,
 .inspector-panel::-webkit-scrollbar-track,
 .event-feed::-webkit-scrollbar-track {
-  background: rgba(22, 24, 25, 0.42);
+  background: var(--scrollbar-track);
   border-radius: 999px;
 }
 
 .deck-shell::-webkit-scrollbar-thumb,
 .inspector-panel::-webkit-scrollbar-thumb,
 .event-feed::-webkit-scrollbar-thumb {
-  background: rgba(217, 167, 94, 0.4);
-  border: 3px solid rgba(22, 24, 25, 0.42);
+  background: var(--scrollbar-thumb);
+  border: 3px solid var(--scrollbar-track);
   border-radius: 999px;
 }
 
 .deck-shell::-webkit-scrollbar-thumb:hover,
 .inspector-panel::-webkit-scrollbar-thumb:hover,
 .event-feed::-webkit-scrollbar-thumb:hover {
-  background: rgba(217, 167, 94, 0.56);
+  background: var(--scrollbar-thumb-hover);
 }
 
 .recent-audio-chip {
@@ -588,9 +1051,9 @@ button {
   width: 100%;
   padding: 12px 14px;
   text-align: left;
-  color: var(--console-ink);
-  background: rgba(22, 24, 25, 0.72);
-  border: 1px solid var(--console-border);
+  color: var(--text-primary);
+  background: var(--surface-chip);
+  border: 1px solid var(--border-subtle);
 }
 
 .recent-audio-chip strong {
@@ -599,7 +1062,7 @@ button {
 
 .recent-audio-chip span {
   max-width: 100%;
-  color: var(--console-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -619,8 +1082,8 @@ button {
   position: fixed;
   min-width: 180px;
   padding: 6px 0;
-  background: rgba(29, 33, 35, 0.98);
-  border: 1px solid var(--console-border-strong);
+  background: var(--surface-menu);
+  border: 1px solid var(--border-strong);
   border-radius: 14px;
   z-index: 1000;
   box-shadow: var(--shadow-soft);
@@ -632,7 +1095,7 @@ button {
 }
 
 .context-menu-item:hover {
-  background: rgba(43, 50, 54, 0.9);
+  background: var(--surface-hover);
 }
 
 .modal {
@@ -641,15 +1104,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 10, 11, 0.72);
+  background: var(--surface-modal-overlay);
   z-index: 2000;
 }
 
 .modal-content {
   width: min(92vw, 420px);
   padding: var(--space-4);
-  background: rgba(29, 33, 35, 0.98);
-  border: 1px solid var(--console-border-strong);
+  background: var(--surface-modal);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
@@ -661,16 +1124,16 @@ button {
 }
 
 .modal-content p {
-  color: var(--console-muted);
+  color: var(--text-secondary);
 }
 
 .hotkey-display {
   margin: var(--space-3) 0;
   padding: 16px;
-  background: rgba(22, 24, 25, 0.82);
-  border: 1px solid var(--console-border);
+  background: var(--surface-hotkey);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  color: var(--signal-amber);
+  color: var(--accent-highlight);
   font-family: "IBM Plex Mono", monospace;
   text-align: center;
 }

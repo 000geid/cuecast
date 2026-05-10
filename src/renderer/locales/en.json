@@ -11,13 +11,22 @@
   "controlRail": {
     "output": "Output",
     "defaultOutput": "Default Output",
+    "hotkeysLabel": "Hotkeys",
+    "armed": "Armed",
+    "disarmed": "Disarmed",
     "stopAll": "Stop All",
     "stopAllTitle": "Stop All (Space)"
   },
   "deck": {
     "kicker": "Performance Surface",
     "title": "Main Deck",
-    "caption": "Click a cue to fire it live. Inspect a cue to edit label, file, level, or hotkey."
+    "caption": "Click a cue to fire it live. Inspect a cue to edit label, file, level, or hotkey.",
+    "captionArmed": "Deck hotkeys are live while focus stays on the cue surface.",
+    "captionIdle": "Use the button or focus a cue to arm deck hotkeys.",
+    "hotkeysArmed": "Hotkeys Live",
+    "hotkeysIdle": "Hotkeys Idle",
+    "armButtonIdle": "Activate Hotkeys",
+    "armButtonActive": "Deactivate Hotkeys"
   },
   "cueTile": {
     "dropAudio": "Drop audio or click to assign",
@@ -107,9 +116,15 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
+    "theme": "Theme",
     "languages": {
       "en": "English",
       "es": "Español"
+    },
+    "themes": {
+      "cuecast": "CueCast Console",
+      "frappe": "Catppuccin Frappe",
+      "atomOne": "Atom One Dark"
     }
   }
 }

@@ -79,6 +79,7 @@ export function useCuecastController() {
   const [events, setEvents] = useState<EventItem[]>([{ id: 0, text: i18n.t('status.armed') }]);
   const [ctxMenu, setCtxMenu] = useState<ContextMenuState>(null);
   const [hotkeyIndex, setHotkeyIndex] = useState<number | null>(null);
+  const [deckArmed, setDeckArmed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
@@ -96,6 +97,7 @@ export function useCuecastController() {
     loadStates
   } = audio;
   const configRef = useRef<AppConfig | null>(null);
+  const deckArmedRef = useRef(false);
   const triggerIndexRef = useRef<(buttonIndex: number) => void>(() => {});
   const eventIdRef = useRef(1);
   const playingTimeoutRef = useRef<number | null>(null);
@@ -144,6 +146,14 @@ export function useCuecastController() {
     setCtxMenu(null);
   }, []);
 
+  const armDeckHotkeys = useCallback(() => {
+    setDeckArmed(true);
+  }, []);
+
+  const disarmDeckHotkeys = useCallback(() => {
+    setDeckArmed(false);
+  }, []);
+
   const assignAudioPath = useCallback(
     async (index: number, filePath: string) => {
       if (!configRef.current) return;
@@ -174,6 +184,7 @@ export function useCuecastController() {
     if (!showSettings) {
       setSelectedIndex(null);
     }
+    setDeckArmed(false);
   }, [showSettings]);
 
   const clearButton = useCallback(
@@ -329,6 +340,10 @@ export function useCuecastController() {
   }, [config]);
 
   useEffect(() => {
+    deckArmedRef.current = deckArmed;
+  }, [deckArmed]);
+
+  useEffect(() => {
     if (!config) return;
     setDraft(buildDraft(config, selectedIndex));
   }, [config, selectedIndex]);
@@ -355,6 +370,10 @@ export function useCuecastController() {
       });
 
       const removeTriggerButtonListener = window.electronAPI.onTriggerButton((index: number) => {
+        if (!deckArmedRef.current) {
+          return;
+        }
+
         const recentLocalHotkey = lastLocalHotkeyRef.current;
         if (
           document.hasFocus() &&
@@ -435,7 +454,7 @@ export function useCuecastController() {
         (event.key === ' ' || event.code === 'Space');
 
       const currentConfig = configRef.current;
-      if (currentConfig && !isEditable && !hasOpenModal) {
+      if (currentConfig && deckArmed && !isEditable && !hasOpenModal) {
         const accelerator = acceleratorFromKeyboardEvent(event);
         if (accelerator) {
           const match = currentConfig.hotkeys[accelerator];
@@ -456,11 +475,11 @@ export function useCuecastController() {
 
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [hotkeyIndex, pushStatus, stopAllAudio, triggerIndex]);
+  }, [deckArmed, hotkeyIndex, pushStatus, stopAllAudio, triggerIndex]);
 
   useEffect(() => {
-    window.electronAPI.setHotkeysEnabled(hotkeyIndex === null);
-  }, [hotkeyIndex]);
+    window.electronAPI.setHotkeysEnabled(deckArmed && hotkeyIndex === null);
+  }, [deckArmed, hotkeyIndex]);
 
   useEffect(() => {
     return () => window.electronAPI.setHotkeysEnabled(true);
@@ -504,6 +523,7 @@ export function useCuecastController() {
     status,
     events,
     ctxMenu,
+    deckArmed,
     hotkeyIndex,
     showSettings,
     selectedIndex,
@@ -516,7 +536,9 @@ export function useCuecastController() {
     outputDeviceLabel,
     selectedButton,
     assignedHotkey,
+    armDeckHotkeys,
     selectIndex,
+    disarmDeckHotkeys,
     setDraft,
     setCtxMenu,
     setHotkeyIndex,

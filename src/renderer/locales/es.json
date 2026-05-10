@@ -11,13 +11,22 @@
   "controlRail": {
     "output": "Salida",
     "defaultOutput": "Salida Predeterminada",
+    "hotkeysLabel": "Atajos",
+    "armed": "Armed",
+    "disarmed": "Disarmed",
     "stopAll": "Detener Todo",
     "stopAllTitle": "Detener Todo (Espacio)"
   },
   "deck": {
     "kicker": "Superficie de Actuación",
     "title": "Deck Principal",
-    "caption": "Haz clic en un cue para dispararlo en vivo. Inspecciona un cue para editar etiqueta, archivo, nivel o atajo."
+    "caption": "Haz clic en un cue para dispararlo en vivo. Inspecciona un cue para editar etiqueta, archivo, nivel o atajo.",
+    "captionArmed": "Los atajos del deck están activos mientras el foco siga en la superficie de cues.",
+    "captionIdle": "Usa el boton o enfoca un cue para activar los atajos del deck.",
+    "hotkeysArmed": "Atajos Activos",
+    "hotkeysIdle": "Atajos Inactivos",
+    "armButtonIdle": "Activar Atajos",
+    "armButtonActive": "Desactivar Atajos"
   },
   "cueTile": {
     "dropAudio": "Suelta audio o haz clic para asignar",
@@ -107,9 +116,15 @@
   "settings": {
     "title": "Configuración",
     "language": "Idioma",
+    "theme": "Tema",
     "languages": {
       "en": "English",
       "es": "Español"
+    },
+    "themes": {
+      "cuecast": "Consola CueCast",
+      "frappe": "Catppuccin Frappe",
+      "atomOne": "Atom One Dark"
     }
   }
 }

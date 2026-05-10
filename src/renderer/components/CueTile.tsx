@@ -71,7 +71,7 @@ export const CueTile: React.FC<Props> = ({
           <span className="cue-hotkey">{hotkey || t('cueTile.noHotkey')}</span>
         </div>
         <div className="cue-copy">
-          <strong>{button.label}</strong>
+          <strong title={button.label}>{button.label}</strong>
           <span>{button.path ? formatPath(button.path) : t('cueTile.dropAudio')}</span>
         </div>
         <div className="cue-footer">

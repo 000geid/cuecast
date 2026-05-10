@@ -88,7 +88,6 @@ function createWindow(): void {
 function registerHotkeys(): HotkeyRegistrationResult[] {
   if (hotkeysSuppressed) {
     globalShortcut.unregisterAll();
-    if (mainWindow) mainWindow.webContents.send('hotkeys-registered', []);
     return [];
   }
   globalShortcut.unregisterAll();
