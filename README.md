@@ -1,6 +1,6 @@
 # CueCast – Open Source Desktop Soundboard
 
-CueCast is a fast, simple desktop soundboard for streamers and podcasters in Lima, Peru. It serves an untapped market with a free, open source alternative to mobile-only tools and paywalled apps.
+CueCast is a fast, simple desktop soundboard for streamers and podcasters. It serves a free, open source alternative to mobile-only tools and paywalled apps.
 
 Upload sounds, assign them to buttons, and trigger audio with your mouse or global hotkeys. Route output to a virtual device for clean capture in OBS/Streamlabs.
 
